@@ -121,7 +121,6 @@ def move(x0, y0, x1, y1, player):
 
 
 
-Tabuleiro[4][8] = CD
 
 
 
