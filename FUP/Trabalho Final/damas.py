@@ -17,6 +17,10 @@ for x in range(0, 10):
         Tabuleiro[x].append(Vazio)
 
 def zerarTabuleiro():
+    global posicoesDeC
+    global posicoesDeB
+    posicoesDeC = []
+    posicoesDeB = []
     for x in range(0, 10):
         if x<3:
             for y in range(0, 5):
@@ -38,8 +42,8 @@ def zerarTabuleiro():
 def imprimirTabuleiro(**kwargs):
     linhas = kwargs.get("linhas", [])
     msgs = kwargs.get("msgs", [])
-    global Tabuleiro
-    print("  +-A-+-B-+-C-+-D-+-E-+-F-+-G-+-H-+-I-+-J-+")
+    print("    A   B   C   D   E   F   G   H   I   J")
+    print("  +"+("---+"*10))
     for x in range(0, 10):
         print(x, "| ", end='')
         for y in range(0, 10):
@@ -64,189 +68,209 @@ def podeComer(x0, y0, peca):
     if peca==BD or peca==CD:
         for i in range(0, 4):
             for i2 in range(1, 9):
-                if peca==BD:
-                    if Tabuleiro[x0+i2*(-1**(i//2))][y0+(-1**i)]==CN or Tabuleiro[x0+i2*(-1**(i//2))][y0+(-1**i)]==CD:
-                        if x0+(i2+1)*(-1**(i//2))<10 and y0+(i2+1)*(-1**i)<10 and Tabuleiro[x0+(i2+1)*(-1**(i//2))][y0+(i2+1)*(-1**i)]==Vazio:
-                            return True
-                elif peca==CD:
-                    if Tabuleiro[x0+i2*(-1**(i//2))][y0+(-1**i)]==BN or Tabuleiro[x0+i2*(-1**(i//2))][y0+(-1**i)]==BD:
-                        if x0+(i2+1)*(-1**(i//2))<10 and y0+(i2+1)*(-1**i)<10 and Tabuleiro[x0+(i2+1)*(-1**(i//2))][y0+(i2+1)*(-1**i)]==Vazio:
-                            return True
+                if x0+(i2+1)*((-1)**(i//2))<10 and y0+(i2+1)*((-1)**i)<10 and x0+(i2+1)*((-1)**(i//2))>-1 and y0+(i2+1)*((-1)**i)>-1:   
+                    if peca==BD:
+                        if Tabuleiro[x0+i2*((-1)**(i//2))][y0+i2((-1)**i)]==CN or Tabuleiro[x0+i2*((-1)**(i//2))][y0+i2((-1)**i)]==CD:
+                            if Tabuleiro[x0+(i2+1)*((-1)**(i//2))][y0+(i2+1)*((-1)**i)]==Vazio:
+                                return True
+                    elif peca==CD:
+                        if Tabuleiro[x0+i2*((-1)**(i//2))][y0+i2*((-1)**i)]==BN or Tabuleiro[x0+i2*((-1)**(i//2))][y0+i2*((-1)**i)]==BD:
+                            if Tabuleiro[x0+(i2+1)*((-1)**(i//2))][y0+(i2+1)*((-1)**i)]==Vazio:
+                                return True
         return False
     else:
         for i in range(0, 4):
-            if peca==BN:
-                if Tabuleiro[x0+(-1**(i//2))][y0+(-1**i)]==CN or Tabuleiro[x0+(-1**(i//2))][y0+(-1**i)]==CD:
-                    if x0+2*(-1**(i//2))<10 and y0+2*(-1**i)<10 and Tabuleiro[x0+2*(-1**(i//2))][y0+2*(-1**i)]==Vazio:
-                        return True
-            elif peca==CN:
-                print(x0, y0, i, (-1)**(i//2), (-1)**i)
-                if Tabuleiro[x0+((-1)**(i//2))][y0+((-1)**i)]==BN or Tabuleiro[x0+((-1)**(i//2))][y0+((-1)**i)]==BD:
-                    if x0+2*((-1)**(i//2))<10 and y0+2*((-1)**i)<10 and Tabuleiro[x0+2*((-1)**(i//2))][y0+2*((-1)**i)]==Vazio:
-                        return True
+            if x0+2*((-1)**(i//2))<10 and y0+2*((-1)**i)<10 and x0+2*((-1)**(i//2))>-1 and y0+2*((-1)**i)>-1:
+                if peca==BN:
+                    if Tabuleiro[x0+((-1)**(i//2))][y0+((-1)**i)]==CN or Tabuleiro[x0+((-1)**(i//2))][y0+((-1)**i)]==CD:
+                        if Tabuleiro[x0+2*((-1)**(i//2))][y0+2*((-1)**i)]==Vazio:
+                            return True
+                elif peca==CN:
+                    if Tabuleiro[x0+((-1)**(i//2))][y0+((-1)**i)]==BN or Tabuleiro[x0+((-1)**(i//2))][y0+((-1)**i)]==BD:
+                        if Tabuleiro[x0+2*((-1)**(i//2))][y0+2*((-1)**i)]==Vazio:
+                            return True
         return False
 
 
 
-def mover(x0, y0, x1, y1, player):
-    global Tabuleiro
-    global jogadorB
-    global jogadorC
-    global podeComer
+
+# 'x0', 'y0' representam as coordenadas do peça que vai mover, e 'x1', 'y1' representam as coordenadas de destino da peça
+def mover(x0, y0, x1, y1, jogador):
     deltaY = y1-y0
     deltaX = x1-x0
     if abs(deltaX)==abs(deltaY) and x0>-1 and y0>-1 and x1<10 and y1<10 and not deltaX==0 and Tabuleiro[x1][y1]==Vazio:
-        if player=="C":
-            precisaComer = False
-            podeComer2 = False
-            for pos in posicoesDeC:
-                X = int(pos[0])
-                Y = int(pos[1])
-                peca = CN
-                if Tabuleiro[X][Y] == CD:
+        deveComer = False
+        podeComer2 = False
+        posicoes = posicoesDeC
+        if jogador=="B":
+            posicoes = posicoesDeB
+        for pos in posicoes:
+            peca = CN
+            if jogador=="C":
+                if Tabuleiro[x0][y0] == CD:
                     peca = CD
-                if podeComer(X, Y, peca):
-                    precisaComer = True
-                    print(X, Y, peca, x0, y0)
-                    if X==x0 and Y==y0:
-                        podeComer2 = True
-                    exit()
-            if Tabuleiro[x0][y0] == CN:
-                if podeComer2 and abs(deltaX)==2:
-                    meio = Tabuleiro[x0+deltaX//2][y0+deltaY//2]
-                    if meio==BN or meio==BD:
-                        Tabuleiro[x0][y0] = Vazio
-                        jogadorB.append(meio)
-                        Tabuleiro[x0+deltaX//2][y0+deltaY//2] = Vazio
-                        posicoesDeB.remove(str(x0+deltaX//2)+str(y0+deltaY//2))
-                        if x1==9:
-                            Tabuleiro[x1][y1] = CD
-                        else:
-                            Tabuleiro[x1][y1] = CN
-                        posicoesDeC.remove(str(x0)+str(y0))
-                        posicoesDeC.append(str(x1)+str(y1))
-                        return 2
-                if precisaComer:
-                    return 4
-                if deltaX==1:
-                    if x1==9:
-                        Tabuleiro[x1][y1] = CD
-                    else:
-                        Tabuleiro[x1][y1] = CN
-                    Tabuleiro[x0][y0] = Vazio
-                    posicoesDeC.remove(str(x0)+str(y0))
-                    posicoesDeC.append(str(x1)+str(y1))
-                    return 1
-                return 0
-            elif Tabuleiro[x0][y0] == CD:
-                pecas = 0
-                x = 0
-                y = 0
-                i1 = 1
-                i2 = 1
-                if deltaX<0:
-                    i1 = -1
-                if deltaY<0:
-                    i2 = -1
-                for i in range(1, abs(deltaX)+1):
-                    if Tabuleiro[x0+i*i1][y0+i*i2] == CN or Tabuleiro[x0+i*i1][y0+i*i2] == CD:
-                        return 0
-                    elif Tabuleiro[x0+i*i1][y0+i*i2] == BN or Tabuleiro[x0+i*i1][y0+i*i2] == BD:
-                        if pecas==1:
-                            return 0
-                        pecas = 1
-                        x = x0+(i*i1)
-                        y = y0+(i*i2)
-                if precisaComer:
-                    if podeComer2 and pecas==1:
-                        jogadorB.append(Tabuleiro[x][y])
-                        posicoesDeB.remove(str(x)+str(y))
-                        Tabuleiro[x0][y0] = Vazio
-                        Tabuleiro[x1][y1] = CD
-                        posicoesDeC.remove(str(x0)+str(y0))
-                        posicoesDeC.append(str(x1)+str(y1))
-                        return 2
-                    return 4
-                Tabuleiro[x0][y0] = Vazio
-                Tabuleiro[x1][y1] = CD
-                return 1
-        elif player=="B":
-            if Tabuleiro[x0][y0] == BN:
-                precisaComer = False
-                podeComer2 = False
-                for pos in posicoesDeC:
-                    peca = CN
-                    if Tabuleiro[x0][y0] == CD:
-                        peca = CD
-                    if podeComer(int(pos[0]), int(pos[1]), peca):
-                        precisaComer = True
-                        if int(pos[0])==x0 and int(pos[1])==y0:
-                            podeComer2 = True
-                if podeComer2 and abs(deltaX)==2:
-                    meio = Tabuleiro[x0+(deltaX//2)][y0+(deltaY//2)]
-                    if meio==CN or meio==CD:
-                        Tabuleiro[x0][y0] = Vazio
-                        jogadorC.append(meio)
-                        Tabuleiro[x0+(deltaX//2)][y0+(deltaY//2)] = Vazio
-                        posicoesDeC.remove(str(x0+deltaX//2)+str(y0+deltaY//2))
-                        if x1==0:
-                            Tabuleiro[x1][y1] = BD
-                        else:
-                            Tabuleiro[x1][y1] = BN
-                        posicoesDeB.remove(str(x0)+str(y0))
-                        posicoesDeB.append(str(x1)+str(y1))
-                        return 2
-                    return 4
-                if precisaComer:
-                    return 4
-                if deltaX==-1:
-                    if x1==0:
-                        Tabuleiro[x1][y1] = BD
-                    else:
-                        Tabuleiro[x1][y1] = BN
-                    Tabuleiro[x0][y0] = Vazio
-                    posicoesDeB.remove(str(x0)+str(y0))
-                    posicoesDeB.append(str(x1)+str(y1))
-                    return 1
+            else:
+                if Tabuleiro[x0][y0] == BD:
+                    peca = BD
                 else:
-                    return 0
+                    peca = BN
+            if podeComer(int(pos[0]), int(pos[1]), peca):
+                deveComer = True
+                if int(pos[0])==x0 and int(pos[1])==y0:
+                    podeComer2 = True
+        if jogador=="C":
+            if Tabuleiro[x0][y0] == CN:
+                return moverCN(x0, y0, x1, y1, deveComer, podeComer2)
+            elif Tabuleiro[x0][y0] == CD:
+                return moverCD(x0, y0, x1, y1, deveComer, podeComer2)
+        elif jogador=="B":
+            if Tabuleiro[x0][y0] == BN:
+                return moverBN(x0, y0, x1, y1, deveComer, podeComer2)
             elif Tabuleiro[x0][y0] == BD:
-                pecas = 0
-                x = 0
-                y = 0
-                i1 = 1
-                i2 = 1
-                if deltaX<0:
-                    i1 = -1
-                if deltaY<0:
-                    i2 = -1
-                for i in range(1, abs(deltaX)+1):
-                    if Tabuleiro[x0+i*i1][y0+i*i2] == BN or Tabuleiro[x0+i*i1][y0+i*i2] == BD:
-                        return 0
-                    elif Tabuleiro[x0+i*i1][y0+i*i2] == CN or Tabuleiro[x0+i*i1][y0+i*i2] == CD:
-                        if pecas==1:
-                            return 0
-                        pecas += 1
-                        x = x0+i*i1
-                        y = y0+i*i2
-                if precisaComer:
-                    if podeComer2 and pecas==1:
-                        jogadorB.append(Tabuleiro[x][y])
-                        posicoesDeC.remove(str(x)+str(y))
-                        Tabuleiro[x0][y0] = Vazio
-                        Tabuleiro[x1][y1] = CD
-                        posicoesDeB.remove(str(x0)+str(y0))
-                        posicoesDeB.append(str(x1)+str(y1))
-                        return 2
-                    return 4
-                Tabuleiro[x0][y0] = Vazio
-                Tabuleiro[x1][y1] = CD
-                posicoesDeB.remove(str(x0)+str(y0))
-                posicoesDeB.append(str(x1)+str(y1))
-                return 1
+                return moverBD(x0, y0, x1, y1, deveComer, podeComer2)
     return 0
 
+# Essa função serve para tratar o movimento de uma peça normal do jogador C
+def moverCN(x0, y0, x1, y1, deveComer, podeComer2):
+    deltaX = x1-x0
+    deltaY = y1-y0
+    if podeComer2 and abs(deltaX)==2: # Checa se a peça com a qual o jogador tiver jogando pode comer, e se o movimento é um pulo (possível comida)
+        meio = Tabuleiro[x0+deltaX//2][y0+deltaY//2] # Pega a peça que está no meio do pulo
+        if meio==BN or meio==BD:
+            Tabuleiro[x0][y0] = Vazio
+            jogadorB.append(meio)
+            Tabuleiro[x0+deltaX//2][y0+deltaY//2] = Vazio
+            posicoesDeB.remove(str(x0+deltaX//2)+str(y0+deltaY//2))
+            if x1==9:
+                Tabuleiro[x1][y1] = CD
+            else:
+                Tabuleiro[x1][y1] = CN
+            posicoesDeC.remove(str(x0)+str(y0))
+            posicoesDeC.append(str(x1)+str(y1))
+            return 2 
+    if deveComer: # Isso ocorre caso o movimento não tenha sido de comer, mas poderia ter sido
+        return 3
+    if deltaX==1: # Isso ocorre se o movimento não foi de comida e nem poderia ter sido
+        if x1==9:
+            Tabuleiro[x1][y1] = CD
+        else:
+            Tabuleiro[x1][y1] = CN
+        Tabuleiro[x0][y0] = Vazio
+        posicoesDeC.remove(str(x0)+str(y0))
+        posicoesDeC.append(str(x1)+str(y1))
+        return 1
+    return 0
 
+# Essa função serve para tratar o movimento da dama do jogador C
+def moverCD(x0, y0, x1, y1, deveComer, podeComer2):
+    deltaX = x1-x0
+    deltaY = y1-y0
+    pecas = 0
+    x = 0
+    y = 0
+    i1 = 1
+    i2 = 1
+    if deltaX<0:
+        i1 = -1
+    if deltaY<0:
+        i2 = -1
+    for i in range(1, abs(deltaX)+1):
+        if Tabuleiro[x0+i*i1][y0+i*i2] == CN or Tabuleiro[x0+i*i1][y0+i*i2] == CD:
+            return 0
+        elif Tabuleiro[x0+i*i1][y0+i*i2] == BN or Tabuleiro[x0+i*i1][y0+i*i2] == BD:
+            if pecas==1:
+                return 0
+            pecas = 1
+            x = x0+(i*i1)
+            y = y0+(i*i2)
+    if deveComer:
+        if podeComer2 and pecas==1:
+            jogadorB.append(Tabuleiro[x][y])
+            posicoesDeB.remove(str(x)+str(y))
+            Tabuleiro[x0][y0] = Vazio
+            Tabuleiro[x][y] = Vazio
+            Tabuleiro[x1][y1] = CD
+            posicoesDeC.remove(str(x0)+str(y0))
+            posicoesDeC.append(str(x1)+str(y1))
+            return 2
+        return 3
+    Tabuleiro[x0][y0] = Vazio
+    Tabuleiro[x1][y1] = CD
+    posicoesDeC.remove(str(x0)+str(y0))
+    posicoesDeC.append(str(x1)+str(y1))
+    return 1
+
+# Essa função serve para tratar o movimento de uma peça normal do jogador B
+def moverBN(x0, y0, x1, y1, deveComer, podeComer2):
+    deltaX = x1-x0
+    deltaY = y1-y0
+    if podeComer2 and abs(deltaX)==2:
+        meio = Tabuleiro[x0+(deltaX//2)][y0+(deltaY//2)]
+        if meio==CN or meio==CD:
+            Tabuleiro[x0][y0] = Vazio
+            jogadorC.append(meio)
+            Tabuleiro[x0+(deltaX//2)][y0+(deltaY//2)] = Vazio
+            posicoesDeC.remove(str(x0+deltaX//2)+str(y0+deltaY//2))
+            if x1==0:
+                Tabuleiro[x1][y1] = BD
+            else:
+                Tabuleiro[x1][y1] = BN
+            posicoesDeB.remove(str(x0)+str(y0))
+            posicoesDeB.append(str(x1)+str(y1))
+            return 2
+        return 3
+    if deveComer:
+        return 3
+    if deltaX==-1:
+        if x1==0:
+            Tabuleiro[x1][y1] = BD
+        else:
+            Tabuleiro[x1][y1] = BN
+        Tabuleiro[x0][y0] = Vazio
+        posicoesDeB.remove(str(x0)+str(y0))
+        posicoesDeB.append(str(x1)+str(y1))
+        return 1
+    else:
+        return 0
+
+# Essa função serve para tratar o movimento da dama do jogador B
+def moverBD(x0, y0, x1, y1, deveComer, podeComer):
+    deltaX = x1-x0
+    deltaY = y1-y0
+    pecas = 0
+    x = 0
+    y = 0
+    i1 = 1
+    i2 = 1
+    if deltaX<0:
+        i1 = -1
+    if deltaY<0:
+        i2 = -1
+    for i in range(1, abs(deltaX)+1):
+        if Tabuleiro[x0+i*i1][y0+i*i2] == BN or Tabuleiro[x0+i*i1][y0+i*i2] == BD:
+            return 0
+        elif Tabuleiro[x0+i*i1][y0+i*i2] == CN or Tabuleiro[x0+i*i1][y0+i*i2] == CD:
+            if pecas==1:
+                return 0
+            pecas += 1
+            x = x0+i*i1
+            y = y0+i*i2
+    if deveComer:
+        if podeComer2 and pecas==1:
+            jogadorB.append(Tabuleiro[x][y])
+            posicoesDeC.remove(str(x)+str(y))
+            Tabuleiro[x0][y0] = Vazio
+            Tabuleiro[x][y]
+            Tabuleiro[x1][y1] = CD
+            posicoesDeB.remove(str(x0)+str(y0))
+            posicoesDeB.append(str(x1)+str(y1))
+            return 2
+        return 3
+    Tabuleiro[x0][y0] = Vazio
+    Tabuleiro[x1][y1] = CD
+    posicoesDeB.remove(str(x0)+str(y0))
+    posicoesDeB.append(str(x1)+str(y1))
+    return 1
 
 
 
@@ -259,7 +283,7 @@ import re
 zerarTabuleiro()
 Jogando = True
 jogador = "C"
-print("\n"*8)
+print("\n"*3)
 imprimirTabuleiro(linhas = [3], msgs = ["Agora é a vez do jogador %s"%jogador])
 while Jogando:
     print("Digite sua jogada (Ex: A2--B3):")
@@ -272,11 +296,13 @@ while Jogando:
         x1 = int(entrada[1][1])
         jogada = mover(x0, y0, x1, y1, jogador)
         if jogada>0:
-            if len(jogadorC)==15 or len(jogadorB)==15:
-                imprimirTabuleiro(linhas = [3, 5], msgs = ["Parabéns jogador %s você venceu!"%jogador, "O jogo acabou, quer começar novamente? (S/N)"])
+            if len(posicoesDeC)==0 or len(posicoesDeB)==0:
+                print("\n"*3)
+                imprimirTabuleiro(linhas = [3, 5, 6], msgs = ["Parabéns jogador %s você venceu!"%jogador, "O jogo acabou, você quer começar", "novamente? (S/N)"])
                 entrada = input().lower()
                 while not (entrada=='s' or entrada=='n'):
-                    print("Opção inválida! (S/N)")
+                    print("\n"*3)
+                    imprimirTabuleiro(linhas = [3, 5, 6, 8], msgs = ["Parabéns jogador %s você venceu!"%jogador, "O jogo acabou, você quer começar", "novamente? (S/N)", " "*8+"Opção Inválida!"])
                     entrada = input().lower()
                 if entrada=='n':
                     Jogando = False
@@ -284,22 +310,30 @@ while Jogando:
                 jogador = "C"
                 imprimirTabuleiro(linhas = [3], msgs = ["Agora é a vez do jogador %s"%jogador])
             else:
-                if jogada==1:
-                    if jogador=="C":
-                        jogador = "B"
-                    else:
-                        jogador = "C"
-                elif jogada==4:
-                    imprimirTabuleiro(linhas = [3, 5], msgs = ["Agora é a vez do jogador %s"%jogador, "Você precisa comer a peça do oponente!"])
-                print("\n"*8)
-                imprimirTabuleiro(linhas = [3], msgs = ["Agora é a vez do jogador %s"%jogador])
+                if jogada<3:
+                    if jogada==1:
+                        if jogador=="C":
+                            jogador = "B"
+                        else:
+                            jogador = "C"
+                    print("\n"*3)
+                    imprimirTabuleiro(linhas = [3], msgs = ["Agora é a vez do jogador %s"%jogador])
+                else:
+                    print("\n"*3)
+                    imprimirTabuleiro(linhas = [3, 5], msgs = ["Agora é a vez do jogador %s"%jogador, "Você deve comer a peça do oponente!"])
         else:
-            print("\n"*8)
+            print("\n"*3)
             imprimirTabuleiro(linhas = [3, 5], msgs = ["Agora é a vez do jogador %s"%jogador, "Jogada Inválida!"])
     else:
-        print("\n"*8)
+        print("\n"*3)
         imprimirTabuleiro(linhas = [3, 5], msgs = ["Agora é a vez do jogador %s"%jogador, "Jogada Inválida!"])
-A2--B3
-B7--A6
-B3--A4
-A6--B5
+# A2--B3
+# B7--A6
+# B3--A4
+# A6--B5
+# C2--D3
+# A4--C6
+# I2--J3
+# H7--G6
+# D7--B5
+# H7--G6
