@@ -1,8 +1,8 @@
 Tabuleiro = []
-CN = "o"
-CD = "O"
-BN = "@"
-BD = "&"
+CN = "\033[34mo\033[30m"
+CD = "\033[34mO\033[30m"
+BN = "\033[31m@\033[30m"
+BD = "\033[31m&\033[30m"
 Vazio = " "
 Preto = "#"
 posicoes = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
@@ -43,23 +43,26 @@ def imprimirTabuleiro(**kwargs):
     linhas = kwargs.get("linhas", [])
     msgs = kwargs.get("msgs", [])
     print("    A   B   C   D   E   F   G   H   I   J")
-    print("  +"+("---+"*10))
+    print("  \033[47m\033[30m\033[1m+"+("---+"*10)+"\033[0;0m")
     for x in range(0, 10):
-        print(x, "| ", end='')
+        print(x, "\033[47m\033[30m\033[1m|", end='')
         for y in range(0, 10):
-            print(Tabuleiro[x][y]+" | ", end='')
+            print(" "+Tabuleiro[x][y]+" |", end='')
+        print(end="\033[0;0m ")
         if x==0:
-            print("Jogador C: ", end='')
+            print("Jogador C: \033[47m", end='')
             for C in jogadorC:
                 print(C, end='')
+            print(end="\033[0;0m")
         elif x==1:
-            print("Jogador B: ", end='')
+            print("Jogador B: \033[47m", end='')
             for B in jogadorB:
                 print(B, end='')
+            print(end="\033[0;0m")
         elif x in linhas:
             print(msgs[linhas.index(x)], end='')
         print("")
-        print("  "+("+---"*10)+"+")
+        print("  \033[47m\033[30m\033[1m"+("+---"*10)+"+\033[0;0m")
 
 
 
@@ -278,7 +281,15 @@ def moverBD(x0, y0, x1, y1, deveComer, podeComer):
 
 
 import re
+import sys
 
+entradas = []
+entradaI = 0
+offline = False
+if len(sys.argv)>1:
+    offline = True
+    with open(sys.argv[1], 'r') as f:
+        entradas = f.read().split("\n")
 
 zerarTabuleiro()
 Jogando = True
@@ -287,7 +298,12 @@ print("\n"*3)
 imprimirTabuleiro(linhas = [3], msgs = ["Agora é a vez do jogador %s"%jogador])
 while Jogando:
     print("Digite sua jogada (Ex: A2--B3):")
-    entrada = input()
+    entrada = ''
+    if offline:
+        entrada = entradas[entradaI].upper()
+        entradaI += 1
+    else:
+        entrada = input().upper()
     if bool(re.match("[A-J][0-9]--[A-J][0-9]", entrada)):
         entrada = entrada.split("--")
         y0 = posicoes.index(entrada[0][0])
@@ -299,11 +315,19 @@ while Jogando:
             if len(posicoesDeC)==0 or len(posicoesDeB)==0:
                 print("\n"*3)
                 imprimirTabuleiro(linhas = [3, 5, 6], msgs = ["Parabéns jogador %s você venceu!"%jogador, "O jogo acabou, você quer começar", "novamente? (S/N)"])
-                entrada = input().lower()
+                if offline:
+                    entrada = entradas[entradaI].lower()
+                    entradaI += 1
+                else:
+                    entrada = input().lower()
                 while not (entrada=='s' or entrada=='n'):
                     print("\n"*3)
                     imprimirTabuleiro(linhas = [3, 5, 6, 8], msgs = ["Parabéns jogador %s você venceu!"%jogador, "O jogo acabou, você quer começar", "novamente? (S/N)", " "*8+"Opção Inválida!"])
-                    entrada = input().lower()
+                    if offline:
+                        entrada = entradas[entradaI].lower()
+                        entradaI += 1
+                    else:
+                        entrada = input().lower()
                 if entrada=='n':
                     Jogando = False
                 zerarTabuleiro()
@@ -327,13 +351,3 @@ while Jogando:
     else:
         print("\n"*3)
         imprimirTabuleiro(linhas = [3, 5], msgs = ["Agora é a vez do jogador %s"%jogador, "Jogada Inválida!"])
-# A2--B3
-# B7--A6
-# B3--A4
-# A6--B5
-# C2--D3
-# A4--C6
-# I2--J3
-# H7--G6
-# D7--B5
-# H7--G6
