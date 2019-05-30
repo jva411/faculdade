@@ -11,6 +11,8 @@ jogadorB = []
 posicoesDeC = []
 posicoesDeB = []
 
+import time
+
 for x in range(0, 10):
     Tabuleiro.append([])
     for y in range(0, 10):
@@ -21,21 +23,29 @@ def zerarTabuleiro():
     global posicoesDeB
     posicoesDeC = []
     posicoesDeB = []
+    pontos = 1
     for x in range(0, 10):
         if x<3:
             for y in range(0, 5):
                 Tabuleiro[x][y*2+(x%2)] = CN
                 posicoesDeC.append(str(x)+str(y*2+(x%2)))
                 Tabuleiro[x][y*2+1-(x%2)] = Preto
+                imprimirTabuleiro(linhas = [3], msgs=["Caregando"+("."*pontos)])
+                time.sleep(0.05)
         elif x>6:
             for y in range(0, 5):
                 Tabuleiro[x][y*2+(x%2)] = BN
                 posicoesDeB.append(str(x)+str(y*2+(x%2)))
                 Tabuleiro[x][y*2+1-(x%2)] = Preto
+                imprimirTabuleiro(linhas = [3], msgs=["Caregando"+("."*pontos)])
+                time.sleep(0.05)
         else:
             for y in range(0, 5):
                 Tabuleiro[x][y*2+x%2] = Vazio
                 Tabuleiro[x][y*2+x%2-1] = Preto
+                imprimirTabuleiro(linhas = [3], msgs=["Caregando"+("."*pontos)])
+                time.sleep(0.05)
+        pontos = pontos%3+1
 
 
 
