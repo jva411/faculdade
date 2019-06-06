@@ -1,153 +1,149 @@
-Tabuleiro = []
 CN = "\033[34mo\033[30m"
 CD = "\033[34mO\033[30m"
 BN = "\033[31m@\033[30m"
 BD = "\033[31m&\033[30m"
 Vazio = " "
 Preto = "#"
+Tabuleiro = [[Vazio]*10 for c in range(10)]
 posicoes = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
 jogadorC = []
 jogadorB = []
 posicoesDeC = []
 posicoesDeB = []
 
-for x in range(0, 10):
-    Tabuleiro.append([])
-    for y in range(0, 10):
-        Tabuleiro[x].append(Vazio)
-
+# Essa função reseta o tabuleiro, deixando-o na configuração inicial
 def zerarTabuleiro():
     global posicoesDeC
     global posicoesDeB
     posicoesDeC = []
     posicoesDeB = []
     pontos = 1
-    for x in range(0, 10):
-        if x<3:
-            for y in range(0, 5):
-                Tabuleiro[x][y*2+(x%2)] = CN
-                posicoesDeC.append(str(x)+str(y*2+(x%2)))
-                Tabuleiro[x][y*2+1-(x%2)] = Preto
-        elif x>6:
-            for y in range(0, 5):
-                Tabuleiro[x][y*2+(x%2)] = BN
-                posicoesDeB.append(str(x)+str(y*2+(x%2)))
-                Tabuleiro[x][y*2+1-(x%2)] = Preto
+    for i in range(0, 10):
+        if i<3:
+            for j in range(0, 5):
+                Tabuleiro[i][j*2+(i%2)] = CN
+                posicoesDeC.append(str(i)+str(j*2+(i%2)))
+                Tabuleiro[i][j*2+1-(i%2)] = Preto
+        elif i>6:
+            for j in range(0, 5):
+                Tabuleiro[i][j*2+(i%2)] = BN
+                posicoesDeB.append(str(i)+str(j*2+(i%2)))
+                Tabuleiro[i][j*2+1-(i%2)] = Preto
         else:
-            for y in range(0, 5):
-                Tabuleiro[x][y*2+x%2] = Vazio
-                Tabuleiro[x][y*2+x%2-1] = Preto
+            for j in range(0, 5):
+                Tabuleiro[i][j*2+i%2] = Vazio
+                Tabuleiro[i][j*2-i%2+1] = Preto
         pontos = pontos%3+1
 
 
-
+# Essa função imprimi no terminal o atual estado do tabuleiro, e as mensagens ao lado dele
 def imprimirTabuleiro(**kwargs):
     linhas = kwargs.get("linhas", [])
     msgs = kwargs.get("msgs", [])
     possiveisComidas = kwargs.get("possiveisComidas", [[[], []], [[], []]])
     print("    A   B   C   D   E   F   G   H   I   J")
     print("  \033[47m\033[30m\033[1m+"+("---+"*10)+"\033[0;0m")
-    for x in range(0, 10):
-        print(x, "\033[47m\033[30m\033[1m|", end='')
-        for y in range(0, 10):
+    for i in range(0, 10):
+        print(i, "\033[47m\033[30m\033[1m|", end='')
+        for j in range(0, 10):
             c = 0
             printado = False
-            while c < len(possiveisComidas[0][0]) and not printado:
-                if x == possiveisComidas[0][0][c] and y == possiveisComidas[0][1][c]:
-                    print("\033[42m "+Tabuleiro[x][y]+" \033[47m\033[30m\033[1m|", end='')
+            while c< len(possiveisComidas[0][0]) and not printado:
+                if i==possiveisComidas[0][0][c] and j==possiveisComidas[0][1][c]:
+                    print("\033[42m "+Tabuleiro[i][j]+" \033[47m\033[30m\033[1m|", end='')
                     printado = True
                 c += 1
             c = 0
-            while c < len(possiveisComidas[1][0]) and not printado:
-                if x in possiveisComidas[1][0] and y == possiveisComidas[1][1][possiveisComidas[1][0].index(x)]:
-                    print("\033[43m "+Tabuleiro[x][y]+" \033[47m\033[30m\033[1m|", end='')
+            while c< len(possiveisComidas[1][0]) and not printado:
+                if i in possiveisComidas[1][0] and j==possiveisComidas[1][1][possiveisComidas[1][0].index(i)]:
+                    print("\033[43m "+Tabuleiro[i][j]+" \033[47m\033[30m\033[1m|", end='')
                     printado = True
                 c += 1
             if not printado:
-                print(" "+Tabuleiro[x][y]+" |", end='')
+                print(" "+Tabuleiro[i][j]+" |", end='')
         print(end="\033[0;0m ")
-        if x==0:
+        if i==0:
             print("Jogador C: \033[47m", end='')
             for C in jogadorC:
                 print(C, end='')
             print(end="\033[0;0m")
-        elif x==1:
+        elif i==1:
             print("Jogador B: \033[47m", end='')
             for B in jogadorB:
                 print(B, end='')
             print(end="\033[0;0m")
-        elif x in linhas:
-            print(msgs[linhas.index(x)], end='')
+        elif i in linhas:
+            print(msgs[linhas.index(i)], end='')
         print("")
         print("  \033[47m\033[30m\033[1m"+("+---"*10)+"+\033[0;0m")
 
 
 
-
-def podeComer(x0, y0, peca):
+# Essa função recebe a posição atual "x0 e y0" da peça "peca", e checa se ela pode comer alguma peça inimiga
+def podeComer(i0, j0, peca):
     pecasComiveis = [[], []] # Vai guardar todas as coordenadas onde há uma peça que possa ser comida
-    pecasComedoras = [[], []] # Vai guardar todas as coordenadas onde há uma peça que possa comer, e um possível destino dela.
+    pecasComedoras = [[], []] # Vai guardar todas as coordenadas onde há uma peça que possa comer, e a casa imediatamente posterior à peça que pode ser comida
     if peca==BD or peca==CD:
-        for i in range(0, 4):
-            for i2 in range(1, 9):
-                x00 = x0+(i2+1)*((-1)**(i//2))
-                y00 = y0+(i2+1)*((-1)**i) # 'x00' e 'y00' são as coordenadas de destino da peça (pulando 1 casa)
-                x01 = x0+i2*((-1)**(i//2))
-                y01 = y0+i2*((-1)**i) # 'x01' e 'y01' são as coordenadas entre o ponto de partida e o de destino (onde pode haver a peça a ser comida)
-                if x00<10 and y00<10 and x00>-1 and y00>-1:
+        for c in range(0, 4):
+            for c2 in range(1, 9):
+                i00 = i0 + (c2 + 1) * ((-1) ** (c // 2))
+                j00 = j0 + (c2 + 1) * ((-1) ** c) # 'x00' e 'y00' são as coordenadas de destino da peça (pulando 1 casa)
+                i01 = i0 + c2 * ((-1) ** (c // 2))
+                j01 = j0 + c2 * ((-1) ** c) # 'x01' e 'y01' são as coordenadas entre o ponto de partida e o de destino (onde pode haver a peça a ser comida)
+                if i00<10 and j00<10 and i00>-1 and j00>-1:
                     if peca==BD:
-                        if Tabuleiro[x01][y01]==CN or Tabuleiro[x01][y01]==CD:
-                            if Tabuleiro[x00][y00]==Vazio:
-                                pecasComiveis[0].append(x01)
-                                pecasComiveis[1].append(y01)
-                                pecasComedoras[0].append(x0)
-                                pecasComedoras[1].append(y0)
-                                pecasComedoras[0].append(x00)
-                                pecasComedoras[1].append(y00)
+                        if Tabuleiro[i01][j01]==CN or Tabuleiro[i01][j01]==CD:
+                            if Tabuleiro[i00][j00]==Vazio:
+                                pecasComiveis[0].append(i01)
+                                pecasComiveis[1].append(j01)
+                                pecasComedoras[0].append(i0)
+                                pecasComedoras[1].append(j0)
+                                pecasComedoras[0].append(i00)
+                                pecasComedoras[1].append(j00)
                     else:
-                        if Tabuleiro[x01][y01]==BN or Tabuleiro[x01][y01]==BD:
-                            if Tabuleiro[x00][y00]==Vazio:
-                                pecasComiveis[0].append(x01)
-                                pecasComiveis[1].append(y01)
-                                pecasComedoras[0].append(x0)
-                                pecasComedoras[1].append(y0)
-                                pecasComedoras[0].append(x00)
-                                pecasComedoras[1].append(y00)
+                        if Tabuleiro[i01][j01]==BN or Tabuleiro[i01][j01]==BD:
+                            if Tabuleiro[i00][j00]==Vazio:
+                                pecasComiveis[0].append(i01)
+                                pecasComiveis[1].append(j01)
+                                pecasComedoras[0].append(i0)
+                                pecasComedoras[1].append(j0)
+                                pecasComedoras[0].append(i00)
+                                pecasComedoras[1].append(j00)
     else:
-        for i in range(0, 4):
-            x00 = x0+2*((-1)**(i//2))
-            y00 = y0+2*((-1)**i) # 'x00' e 'y00' são as coordenadas de destino da peça (pulando 1 casa)
-            x01 = x0+((-1)**(i//2))
-            y01 = y0+((-1)**i) # 'x01' e 'y01' são as coordenadas entre o ponto de partida e o de destino (onde pode haver a peça a ser comida)
-            if x00<10 and y00<10 and x00>-1 and y00>-1:
+        for c in range(0, 4):
+            i00 = i0 + 2 * ((-1) ** (c // 2))
+            j00 = j0 + 2 * ((-1) ** c) # 'x00' e 'y00' são as coordenadas de destino da peça (pulando 1 casa)
+            i01 = i0 + ((-1) ** (c // 2))
+            j01 = j0 + ((-1) ** c) # 'x01' e 'y01' são as coordenadas entre o ponto de partida e o de destino (onde pode haver a peça a ser comida)
+            if i00<10 and j00<10 and i00>-1 and j00>-1:
                 if peca==BN:
-                    if Tabuleiro[x01][y01]==CN or Tabuleiro[x01][y01]==CD:
-                        if Tabuleiro[x00][y00]==Vazio:
-                            pecasComiveis[0].append(x01)
-                            pecasComiveis[1].append(y01)
-                            pecasComedoras[0].append(x0)
-                            pecasComedoras[1].append(y0)
-                            pecasComedoras[0].append(x00)
-                            pecasComedoras[1].append(y00)
+                    if Tabuleiro[i01][j01]==CN or Tabuleiro[i01][j01]==CD:
+                        if Tabuleiro[i00][j00]==Vazio:
+                            pecasComiveis[0].append(i01)
+                            pecasComiveis[1].append(j01)
+                            pecasComedoras[0].append(i0)
+                            pecasComedoras[1].append(j0)
+                            pecasComedoras[0].append(i00)
+                            pecasComedoras[1].append(j00)
                 elif peca==CN:
-                    if Tabuleiro[x01][y01]==BN or Tabuleiro[x01][y01]==BD:
-                        if Tabuleiro[x00][y00]==Vazio:
-                            pecasComiveis[0].append(x01)
-                            pecasComiveis[1].append(y01)
-                            pecasComedoras[0].append(x0)
-                            pecasComedoras[1].append(y0)
-                            pecasComedoras[0].append(x00)
-                            pecasComedoras[1].append(y00)
+                    if Tabuleiro[i01][j01]==BN or Tabuleiro[i01][j01]==BD:
+                        if Tabuleiro[i00][j00]==Vazio:
+                            pecasComiveis[0].append(i01)
+                            pecasComiveis[1].append(j01)
+                            pecasComedoras[0].append(i0)
+                            pecasComedoras[1].append(j0)
+                            pecasComedoras[0].append(i00)
+                            pecasComedoras[1].append(j00)
     return [pecasComiveis, pecasComedoras]
 
 
 
 
 # 'x0', 'y0' representam as coordenadas do peça que vai mover, e 'x1', 'y1' representam as coordenadas de destino da peça
-def mover(x0, y0, x1, y1, jogador):
-    deltaY = y1-y0
-    deltaX = x1-x0
-    if abs(deltaX)==abs(deltaY) and x0>-1 and y0>-1 and x1<10 and y1<10 and not deltaX==0 and Tabuleiro[x1][y1]==Vazio:
+def mover(i0, j0, i1, j1, jogador):
+    deltaY = j1 - j0
+    deltaX = i1 - i0
+    if abs(deltaX)==abs(deltaY) and i0>-1 and j0>-1 and i1<10 and j1<10 and not deltaX == 0 and Tabuleiro[i1][j1]==Vazio:
         deveComer = False
         podeComer2 = False
         posicoes = posicoesDeC
@@ -157,10 +153,10 @@ def mover(x0, y0, x1, y1, jogador):
         for pos in posicoes:
             peca = CN
             if jogador=="C":
-                if Tabuleiro[x0][y0] == CD:
+                if Tabuleiro[i0][j0] == CD:
                     peca = CD
             else:
-                if Tabuleiro[x0][y0] == BD:
+                if Tabuleiro[i0][j0] == BD:
                     peca = BD
                 else:
                     peca = BN
@@ -173,164 +169,164 @@ def mover(x0, y0, x1, y1, jogador):
                     possiveisComidas[1][0].append(podeComerRes[1][0][c])
                     possiveisComidas[1][1].append(podeComerRes[1][1][c])
                 deveComer = True
-                if int(pos[0])==x0 and int(pos[1])==y0: # Checa se a peça que pode comer é a que o jogador está movendo
+                if int(pos[0])==i0 and int(pos[1])==j0: # Checa se a peça que pode comer é a que o jogador está movendo
                     podeComer2 = True
         if jogador=="C":
-            if Tabuleiro[x0][y0] == CN:
-                possiveisComidas.append(moverCN(x0, y0, x1, y1, deveComer, podeComer2))
+            if Tabuleiro[i0][j0] == CN:
+                possiveisComidas.append(moverCN(i0, j0, i1, j1, deveComer, podeComer2))
                 return possiveisComidas
-            elif Tabuleiro[x0][y0] == CD:
-                possiveisComidas.append(moverCD(x0, y0, x1, y1, deveComer, podeComer2))
+            elif Tabuleiro[i0][j0] == CD:
+                possiveisComidas.append(moverCD(i0, j0, i1, j1, deveComer, podeComer2))
                 return possiveisComidas
         else:
-            if Tabuleiro[x0][y0] == BN:
-                possiveisComidas.append(moverBN(x0, y0, x1, y1, deveComer, podeComer2))
+            if Tabuleiro[i0][j0] == BN:
+                possiveisComidas.append(moverBN(i0, j0, i1, j1, deveComer, podeComer2))
                 return possiveisComidas
-            elif Tabuleiro[x0][y0] == BD:
-                possiveisComidas.append(moverBD(x0, y0, x1, y1, deveComer, podeComer2))
+            elif Tabuleiro[i0][j0] == BD:
+                possiveisComidas.append(moverBD(i0, j0, i1, j1, deveComer, podeComer2))
                 return possiveisComidas
     return [-1, -1, 0]
 
 # Essa função serve para tratar o movimento de uma peça normal do jogador C
-def moverCN(x0, y0, x1, y1, deveComer, podeComer2):
-    deltaX = x1-x0
-    deltaY = y1-y0
-    if podeComer2 and abs(deltaX)==2: # Checa se a peça com a qual o jogador tiver jogando pode comer, e se o movimento é um pulo (possível comida)
-        meio = Tabuleiro[x0+deltaX//2][y0+deltaY//2] # Pega a peça que está no meio do pulo
+def moverCN(i0, j0, i1, j1, deveComer, podeComer2):
+    deltaI = i1-i0
+    deltaJ = j1-j0
+    if podeComer2 and abs(deltaI)==2: # Checa se a peça com a qual o jogador tiver jogando pode comer, e se o movimento é um pulo (possível comida)
+        meio = Tabuleiro[i0 + deltaI//2][j0 + deltaJ//2] # Pega a peça que está no meio do pulo
         if meio==BN or meio==BD:
-            Tabuleiro[x0][y0] = Vazio
+            Tabuleiro[i0][j0] = Vazio
             jogadorB.append(meio)
-            Tabuleiro[x0+deltaX//2][y0+deltaY//2] = Vazio
-            posicoesDeB.remove(str(x0+deltaX//2)+str(y0+deltaY//2))
-            if x1==9:
-                Tabuleiro[x1][y1] = CD
+            Tabuleiro[i0 + deltaI//2][j0 + deltaJ//2] = Vazio
+            posicoesDeB.remove(str(i0 + deltaI//2) + str(j0 + deltaJ//2))
+            if i1==9:
+                Tabuleiro[i1][j1] = CD
             else:
-                Tabuleiro[x1][y1] = CN
-            posicoesDeC.remove(str(x0)+str(y0))
-            posicoesDeC.append(str(x1)+str(y1))
+                Tabuleiro[i1][j1] = CN
+            posicoesDeC.remove(str(i0) + str(j0))
+            posicoesDeC.append(str(i1) + str(j1))
             return 2 
     if deveComer: # Isso ocorre caso o movimento não tenha sido de comer, mas poderia ter sido
         return 3
-    if deltaX==1: # Isso ocorre se o movimento não foi de comida e nem poderia ter sido
-        if x1==9:
-            Tabuleiro[x1][y1] = CD
+    if deltaI==1: # Isso ocorre se o movimento não foi de comida e nem poderia ter sido
+        if i1==9: # Caso ele tenha chegado da última linha, transforma sua peça em dama
+            Tabuleiro[i1][j1] = CD
         else:
-            Tabuleiro[x1][y1] = CN
-        Tabuleiro[x0][y0] = Vazio
-        posicoesDeC.remove(str(x0)+str(y0))
-        posicoesDeC.append(str(x1)+str(y1))
+            Tabuleiro[i1][j1] = CN
+        Tabuleiro[i0][j0] = Vazio
+        posicoesDeC.remove(str(i0) + str(j0))
+        posicoesDeC.append(str(i1) + str(j1))
         return 1
     return 0
 
 # Essa função serve para tratar o movimento da dama do jogador C
-def moverCD(x0, y0, x1, y1, deveComer, podeComer2):
-    deltaX = x1-x0
-    deltaY = y1-y0
+def moverCD(i0, j0, i1, j1, deveComer, podeComer2):
+    deltaI = i1-i0
+    deltaJ = j1-j0
     pecas = 0
-    x = 0
-    y = 0
+    i = 0
+    j = 0
     i1 = 1
     i2 = 1
-    if deltaX<0:
+    if deltaI<0:
         i1 = -1
-    if deltaY<0:
+    if deltaJ<0:
         i2 = -1
-    for i in range(1, abs(deltaX)+1):
-        if Tabuleiro[x0+i*i1][y0+i*i2] == CN or Tabuleiro[x0+i*i1][y0+i*i2] == CD:
+    for c in range(1, abs(deltaI)+1):
+        if Tabuleiro[i0 + c*i1][j0 + c*i2] == CN or Tabuleiro[i0 + c*i1][j0 + c*i2] == CD:
             return 0
-        elif Tabuleiro[x0+i*i1][y0+i*i2] == BN or Tabuleiro[x0+i*i1][y0+i*i2] == BD:
+        elif Tabuleiro[i0 + c*i1][j0 + c*i2] == BN or Tabuleiro[i0 + c*i1][j0 + c*i2] == BD:
             if pecas==1:
                 return 0
             pecas = 1
-            x = x0+(i*i1)
-            y = y0+(i*i2)
+            i = i0+(c*i1)
+            j = j0+(c*i2)
     if deveComer:
         if podeComer2 and pecas==1:
-            jogadorB.append(Tabuleiro[x][y])
-            posicoesDeB.remove(str(x)+str(y))
-            Tabuleiro[x0][y0] = Vazio
-            Tabuleiro[x][y] = Vazio
-            Tabuleiro[x1][y1] = CD
-            posicoesDeC.remove(str(x0)+str(y0))
-            posicoesDeC.append(str(x1)+str(y1))
+            jogadorB.append(Tabuleiro[i][j])
+            posicoesDeB.remove(str(i)+str(j))
+            Tabuleiro[i0][j0] = Vazio
+            Tabuleiro[i][j] = Vazio
+            Tabuleiro[i1][j1] = CD
+            posicoesDeC.remove(str(i0) + str(j0))
+            posicoesDeC.append(str(i1) + str(j1))
             return 2
         return 3
-    Tabuleiro[x0][y0] = Vazio
-    Tabuleiro[x1][y1] = CD
-    posicoesDeC.remove(str(x0)+str(y0))
-    posicoesDeC.append(str(x1)+str(y1))
+    Tabuleiro[i0][j0] = Vazio
+    Tabuleiro[i1][j1] = CD
+    posicoesDeC.remove(str(i0) + str(j0))
+    posicoesDeC.append(str(i1) + str(j1))
     return 1
 
 # Essa função serve para tratar o movimento de uma peça normal do jogador B
-def moverBN(x0, y0, x1, y1, deveComer, podeComer2):
-    deltaX = x1-x0
-    deltaY = y1-y0
-    if podeComer2 and abs(deltaX)==2:
-        meio = Tabuleiro[x0+(deltaX//2)][y0+(deltaY//2)]
+def moverBN(i0, j0, i1, j1, deveComer, podeComer2):
+    deltaI = i1-i0
+    deltaJ = j1-j0
+    if podeComer2 and abs(deltaI)==2:
+        meio = Tabuleiro[i0 + (deltaI//2)][j0 + (deltaJ//2)]
         if meio==CN or meio==CD:
-            Tabuleiro[x0][y0] = Vazio
+            Tabuleiro[i0][j0] = Vazio
             jogadorC.append(meio)
-            Tabuleiro[x0+(deltaX//2)][y0+(deltaY//2)] = Vazio
-            posicoesDeC.remove(str(x0+deltaX//2)+str(y0+deltaY//2))
-            if x1==0:
-                Tabuleiro[x1][y1] = BD
+            Tabuleiro[i0 + (deltaI//2)][j0 + (deltaJ//2)] = Vazio
+            posicoesDeC.remove(str(i0 + deltaI//2) + str(j0 + deltaJ//2))
+            if i1==0:
+                Tabuleiro[i1][j1] = BD
             else:
-                Tabuleiro[x1][y1] = BN
-            posicoesDeB.remove(str(x0)+str(y0))
-            posicoesDeB.append(str(x1)+str(y1))
+                Tabuleiro[i1][j1] = BN
+            posicoesDeB.remove(str(i0) + str(j0))
+            posicoesDeB.append(str(i1) + str(j1))
             return 2
         return 3
     if deveComer:
         return 3
-    if deltaX==-1:
-        if x1==0:
-            Tabuleiro[x1][y1] = BD
+    if deltaI==-1:
+        if i1==0:
+            Tabuleiro[i1][j1] = BD
         else:
-            Tabuleiro[x1][y1] = BN
-        Tabuleiro[x0][y0] = Vazio
-        posicoesDeB.remove(str(x0)+str(y0))
-        posicoesDeB.append(str(x1)+str(y1))
+            Tabuleiro[i1][j1] = BN
+        Tabuleiro[i0][j0] = Vazio
+        posicoesDeB.remove(str(i0) + str(j0))
+        posicoesDeB.append(str(i1) + str(j1))
         return 1
     else:
         return 0
 
 # Essa função serve para tratar o movimento da dama do jogador B
-def moverBD(x0, y0, x1, y1, deveComer, podeComer):
-    deltaX = x1-x0
-    deltaY = y1-y0
+def moverBD(i0, j0, i1, j1, deveComer, podeComer2):
+    deltaX = i1 - i0
+    deltaY = j1 - j0
     pecas = 0
-    x = 0
-    y = 0
+    i = 0
+    j = 0
     i1 = 1
     i2 = 1
     if deltaX<0:
         i1 = -1
     if deltaY<0:
         i2 = -1
-    for i in range(1, abs(deltaX)+1):
-        if Tabuleiro[x0+i*i1][y0+i*i2] == BN or Tabuleiro[x0+i*i1][y0+i*i2] == BD:
+    for c in range(1, abs(deltaX)+1):
+        if Tabuleiro[i0 + c*i1][j0 + c*i2] == BN or Tabuleiro[i0 + c*i1][j0 + c*i2] == BD:
             return 0
-        elif Tabuleiro[x0+i*i1][y0+i*i2] == CN or Tabuleiro[x0+i*i1][y0+i*i2] == CD:
+        elif Tabuleiro[i0 + c*i1][j0 + c*i2] == CN or Tabuleiro[i0 + c*i1][j0 + c*i2] == CD:
             if pecas==1:
                 return 0
             pecas += 1
-            x = x0+i*i1
-            y = y0+i*i2
+            i = i0 + c * i1
+            j = j0 + c * i2
     if deveComer:
         if podeComer2 and pecas==1:
-            jogadorB.append(Tabuleiro[x][y])
-            posicoesDeC.remove(str(x)+str(y))
-            Tabuleiro[x0][y0] = Vazio
-            Tabuleiro[x][y]
-            Tabuleiro[x1][y1] = CD
-            posicoesDeB.remove(str(x0)+str(y0))
-            posicoesDeB.append(str(x1)+str(y1))
+            jogadorB.append(Tabuleiro[i][j])
+            posicoesDeC.remove(str(i)+str(j))
+            Tabuleiro[i0][j0] = Vazio
+            Tabuleiro[i][j]
+            Tabuleiro[i1][j1] = CD
+            posicoesDeB.remove(str(i0) + str(j0))
+            posicoesDeB.append(str(i1) + str(j1))
             return 2
         return 3
-    Tabuleiro[x0][y0] = Vazio
-    Tabuleiro[x1][y1] = CD
-    posicoesDeB.remove(str(x0)+str(y0))
-    posicoesDeB.append(str(x1)+str(y1))
+    Tabuleiro[i0][j0] = Vazio
+    Tabuleiro[i1][j1] = CD
+    posicoesDeB.remove(str(i0) + str(j0))
+    posicoesDeB.append(str(i1) + str(j1))
     return 1
 
 
@@ -363,11 +359,11 @@ while Jogando:
         entrada = input().upper()
     if bool(re.match("[A-J][0-9]--[A-J][0-9]", entrada)):
         entrada = entrada.split("--")
-        y0 = posicoes.index(entrada[0][0])
-        x0 = int(entrada[0][1])
-        y1 = posicoes.index(entrada[1][0])
-        x1 = int(entrada[1][1])
-        jogada = mover(x0, y0, x1, y1, jogador)
+        j0 = posicoes.index(entrada[0][0])
+        i0 = int(entrada[0][1])
+        j1 = posicoes.index(entrada[1][0])
+        i1 = int(entrada[1][1])
+        jogada = mover(i0, j0, i1, j1, jogador)
         if jogada[2]>0:
             if len(posicoesDeC)==0 or len(posicoesDeB)==0:
                 print("\n"*3)
