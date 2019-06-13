@@ -1,3 +1,6 @@
+# João Victor Alves de Oliveira - 473977
+# Jonatha Willame de Almeida Oliveira - 428717
+
 CN = "\033[34mo\033[30m"
 CD = "\033[34mO\033[30m"
 BN = "\033[31m@\033[30m"
@@ -141,10 +144,10 @@ def podeComer(i0, j0, peca):
 
 # 'i0', 'j0' representam as coordenadas do peça que vai mover, e 'i1', 'j1' representam as coordenadas de destino da peça
 def mover(i0, j0, i1, j1, jogador):
-    deltaY = j1 - j0
-    deltaX = i1 - i0
+    deltaI = i1 - i0
+    deltaJ = j1 - j0
     # Faz uma primeira validação da jogada, checando se é um movimento na diagonal, se as posições inicial e final estão no tabuleiro e não são iguais, se no destino não há nenhuma peça, e se há uma peça na posição inical 
-    if abs(deltaX)==abs(deltaY) and i0>-1 and j0>-1 and i1<10 and j1<10 and not deltaX == 0 and Tabuleiro[i1][j1]==Vazio and not (Tabuleiro[i0][j0] == Vazio and Tabuleiro == Preto):
+    if abs(deltaI)==abs(deltaJ) and i0>-1 and j0>-1 and i1<10 and j1<10 and not deltaI == 0 and Tabuleiro[i1][j1]==Vazio and not (Tabuleiro[i0][j0] == Vazio and Tabuleiro == Preto):
         deveComer = False
         podeComer2 = False
         posicoes = posicoesDeC # Assume que quem está jogando é o jogador C e pega as posições de todas as peças do jogador C, e depois checa se na verdade é o jogador B
@@ -161,18 +164,6 @@ def mover(i0, j0, i1, j1, jogador):
         possiveisComidas = [[[], []], [[], []]] # Vai armazendar duas matrizes, sendo a primeira todas as posições que deverão ser printadas de amarelo, e a segunda, todas que deverão ser printadas de verde
         for pos in posicoes:
             possiveisComidas = podeComer(int(pos[0]), int(pos[1]), peca)
-            # podeComerRes = podeComer(int(pos[0]), int(pos[1]), peca)
-            # if len(podeComerRes[0][0])>0:
-            #     for c in range(0, len(podeComerRes[0][0])):
-            #         possiveisComidas[0][0].append(podeComerRes[0][0][c])
-            #         possiveisComidas[0][1].append(podeComerRes[0][1][c])
-            #     for c in range(0, len(podeComerRes[1][0])):
-            #         possiveisComidas[1][0].append(podeComerRes[1][0][c])
-            #         possiveisComidas[1][1].append(podeComerRes[1][1][c])
-            #     deveComer = True
-            #     if int(pos[0])==i0 and int(pos[1])==j0: # Checa se a peça que pode comer é a que o jogador está movendo
-            #         podeComer2 = True
-            # print(podeComerRes == possiveisComidas)
         if peca==CN:
             possiveisComidas.append(moverCN(i0, j0, i1, j1, deveComer, podeComer2))
             return possiveisComidas
