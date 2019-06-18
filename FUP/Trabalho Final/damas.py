@@ -163,15 +163,18 @@ def mover(i0, j0, i1, j1, jogador):
                 peca = BN
             posicoes = posicoesDeB
         possiveisComidas = [[[], []], [[], []]] # Vai armazendar duas matrizes, sendo a primeira todas as posições que deverão ser printadas de amarelo, e a segunda, todas que deverão ser printadas de verde
-        c = 0
-        while c < len(posicoes) and not deveComer:
-            pos = posicoes[c]
-            possiveisComidas = podeComer(int(pos[0]), int(pos[1]), peca)
-            if len(possiveisComidas[0][0])>0:
+        for pos in posicoes: # Vai percorrer todas as peças do jogador, e vai verificar quais que podem comer, adicionando as posições das que podem ser comidas em possiveisComidas2[0] e as das que podem comer + destino em possiveisComidas2[1] no seguinte formato [[[iComivel,iComivel],[jComivel,jComivel]],[[iComedor,iDestino],[jComedor,jDestino]]]
+            possiveisComidas2 = podeComer(int(pos[0]), int(pos[1]), peca)
+            if len(possiveisComidas2[0][0])>0:
                 deveComer = True
                 if (str(i0)+str(j0))==pos:
                     podeComer2 = True
-            c += 1
+                for c in range(0, len(possiveisComidas2[0][0])):
+                    possiveisComidas[0][0].append(possiveisComidas2[0][0][c])
+                    possiveisComidas[0][1].append(possiveisComidas2[0][1][c])
+                for c in range(0, len(possiveisComidas2[1][0])):
+                    possiveisComidas[1][0].append(possiveisComidas2[1][0][c])
+                    possiveisComidas[1][1].append(possiveisComidas2[1][1][c])
         if peca==CN:
             possiveisComidas.append(moverCN(i0, j0, i1, j1, deveComer, podeComer2))
             return possiveisComidas
