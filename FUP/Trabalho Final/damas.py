@@ -112,12 +112,13 @@ def podeComer(i0, j0, peca):
                                 pecasComedoras[1].append(j0)
                                 pecasComedoras[0].append(i00)
                                 pecasComedoras[1].append(j00)
+        print(pecasComiveis, pecasComedoras)
     else:
         for c in range(0, 4):
-            i00 = i0 + 2 * ((-1) ** (c // 2))
-            j00 = j0 + 2 * ((-1) ** c) # 'i00' e 'j00' são as coordenadas de destino da peça (pulando 1 casa)
-            i01 = i0 + ((-1) ** (c // 2))
-            j01 = j0 + ((-1) ** c) # 'i01' e 'j01' são as coordenadas entre o ponto de partida e o de destino (onde pode haver a peça a ser comida)
+            i00 = i0 + 2*((-1)**(c//2))
+            j00 = j0 + 2*((-1)**c) # 'i00' e 'j00' são as coordenadas de destino da peça (pulando 1 casa)
+            i01 = i0 + ((-1)**(c//2))
+            j01 = j0 + ((-1)**c) # 'i01' e 'j01' são as coordenadas entre o ponto de partida e o de destino (onde pode haver a peça a ser comida)
             if i00<10 and j00<10 and i00>-1 and j00>-1:
                 if peca==BN:
                     if Tabuleiro[i01][j01]==CN or Tabuleiro[i01][j01]==CD:
@@ -144,12 +145,12 @@ def podeComer(i0, j0, peca):
 
 # 'i0', 'j0' representam as coordenadas do peça que vai mover, e 'i1', 'j1' representam as coordenadas de destino da peça
 def mover(i0, j0, i1, j1, jogador):
-    deltaI = i1 - i0
-    deltaJ = j1 - j0
+    deltaI = i1-i0
+    deltaJ = j1-j0
     # Faz uma primeira validação da jogada, checando se é um movimento na diagonal, se as posições inicial e final estão no tabuleiro e não são iguais, se no destino não há nenhuma peça, e se há uma peça na posição inical 
-    if abs(deltaI)==abs(deltaJ) and i0>-1 and j0>-1 and i1<10 and j1<10 and not deltaI == 0 and Tabuleiro[i1][j1]==Vazio and not (Tabuleiro[i0][j0] == Vazio and Tabuleiro == Preto):
-        deveComer = False
-        podeComer2 = False
+    if abs(deltaI)==abs(deltaJ) and i0>-1 and j0>-1 and i1<10 and j1<10 and not deltaI==0 and Tabuleiro[i1][j1]==Vazio and not (Tabuleiro[i0][j0] == Vazio and Tabuleiro == Preto):
+        deveComer = False # Condição se o jogador que está jogando deve comer alguma peça do adversário
+        podeComer2 = False # Condição se a peça que o jogador está jogando pode comer alguma do adversário
         posicoes = posicoesDeC # Assume que quem está jogando é o jogador C e pega as posições de todas as peças do jogador C, e depois checa se na verdade é o jogador B
         peca = CN # Assume que a peça que está sendo movida é uma peça normal do jogador C, e depois checa se é outra
         if jogador=="C":
@@ -162,8 +163,15 @@ def mover(i0, j0, i1, j1, jogador):
                 peca = BN
             posicoes = posicoesDeB
         possiveisComidas = [[[], []], [[], []]] # Vai armazendar duas matrizes, sendo a primeira todas as posições que deverão ser printadas de amarelo, e a segunda, todas que deverão ser printadas de verde
-        for pos in posicoes:
+        c = 0
+        while c < len(posicoes) and not deveComer:
+            pos = posicoes[c]
             possiveisComidas = podeComer(int(pos[0]), int(pos[1]), peca)
+            if len(possiveisComidas[0][0])>0:
+                deveComer = True
+                if (str(i0)+str(j0))==pos:
+                    podeComer2 = True
+            c += 1
         if peca==CN:
             possiveisComidas.append(moverCN(i0, j0, i1, j1, deveComer, podeComer2))
             return possiveisComidas
@@ -327,71 +335,75 @@ def moverBD(i0, j0, i1, j1, deveComer, podeComer2):
 
 import re, sys
 
-entradas = []
-entradaI = 0
-offline = False
-if len(sys.argv)>1:
-    offline = True
-    with open(sys.argv[1], 'r') as f:
-        entradas = f.read().split("\n")
+def Main():
+    entradas = []
+    entradaI = 0
+    offline = False
+    if len(sys.argv)>1:
+        offline = True
+        with open(sys.argv[1], 'r') as f:
+            entradas = f.read().split("\n")
 
-zerarTabuleiro()
-Jogando = True
-jogador = "C"
-print("\n"*3)
-imprimirTabuleiro(linhas = [3], msgs = ["Agora é a vez do jogador %s"%jogador])
-while Jogando:
-    print("Digite sua jogada (Ex: A2--B3):")
-    entrada = ''
-    if offline:
-        entrada = entradas[entradaI].upper()
-        entradaI += 1
-    else:
-        entrada = input().upper()
-    if bool(re.match("[A-J][0-9]--[A-J][0-9]", entrada)):
-        entrada = entrada.split("--")
-        j0 = posicoes.index(entrada[0][0])
-        i0 = int(entrada[0][1])
-        j1 = posicoes.index(entrada[1][0])
-        i1 = int(entrada[1][1])
-        jogada = mover(i0, j0, i1, j1, jogador)
-        if jogada[2]>0:
-            if len(posicoesDeC)==0 or len(posicoesDeB)==0:
-                print("\n"*3)
-                imprimirTabuleiro(linhas = [3, 5, 6], msgs = ["Parabéns jogador %s você venceu!"%jogador, "O jogo acabou, você quer começar", "novamente? (S/N)"])
-                if offline:
-                    entrada = entradas[entradaI].lower()
-                    entradaI += 1
-                else:
-                    entrada = input().lower()
-                while not (entrada=='s' or entrada=='n'):
+    zerarTabuleiro()
+    Jogando = True
+    jogador = "C"
+    print("\n"*3)
+    imprimirTabuleiro(linhas = [3], msgs = ["Agora é a vez do jogador %s"%jogador])
+    while Jogando:
+        print("Digite sua jogada (Ex: A2--B3):")
+        entrada = ''
+        if offline:
+            entrada = entradas[entradaI].upper()
+            entradaI += 1
+        else:
+            entrada = input().upper()
+        if bool(re.match("[A-J][0-9]--[A-J][0-9]", entrada)):
+            entrada = entrada.split("--")
+            j0 = posicoes.index(entrada[0][0])
+            i0 = int(entrada[0][1])
+            j1 = posicoes.index(entrada[1][0])
+            i1 = int(entrada[1][1])
+            jogada = mover(i0, j0, i1, j1, jogador)
+            if jogada[2]>0:
+                if len(posicoesDeC)==0 or len(posicoesDeB)==0:
                     print("\n"*3)
-                    imprimirTabuleiro(linhas = [3, 5, 6, 8], msgs = ["Parabéns jogador %s você venceu!"%jogador, "O jogo acabou, você quer começar", "novamente? (S/N)", " "*8+"Opção Inválida!"])
+                    imprimirTabuleiro(linhas = [3, 5, 6], msgs = ["Parabéns jogador %s você venceu!"%jogador, "O jogo acabou, você quer começar", "novamente? (S/N)"])
                     if offline:
                         entrada = entradas[entradaI].lower()
                         entradaI += 1
                     else:
                         entrada = input().lower()
-                if entrada=='n':
-                    Jogando = False
-                zerarTabuleiro()
-                jogador = "C"
-                imprimirTabuleiro(linhas = [3], msgs = ["Agora é a vez do jogador %s"%jogador])
-            else:
-                if jogada[2]<3:
-                    if jogada[2]==1:
-                        if jogador=="C":
-                            jogador = "B"
+                    while not (entrada=='s' or entrada=='n'):
+                        print("\n"*3)
+                        imprimirTabuleiro(linhas = [3, 5, 6, 8], msgs = ["Parabéns jogador %s você venceu!"%jogador, "O jogo acabou, você quer começar", "novamente? (S/N)", " "*8+"Opção Inválida!"])
+                        if offline:
+                            entrada = entradas[entradaI].lower()
+                            entradaI += 1
                         else:
-                            jogador = "C"
-                    print("\n"*3)
+                            entrada = input().lower()
+                    if entrada=='n':
+                        Jogando = False
+                    zerarTabuleiro()
+                    jogador = "C"
                     imprimirTabuleiro(linhas = [3], msgs = ["Agora é a vez do jogador %s"%jogador])
                 else:
-                    print("\n"*3)
-                    imprimirTabuleiro(linhas = [3, 5], msgs = ["Agora é a vez do jogador %s"%jogador, "Você deve comer a peça do oponente!"], possiveisComidas = jogada)
+                    if jogada[2]<3:
+                        if jogada[2]==1:
+                            if jogador=="C":
+                                jogador = "B"
+                            else:
+                                jogador = "C"
+                        print("\n"*3)
+                        imprimirTabuleiro(linhas = [3], msgs = ["Agora é a vez do jogador %s"%jogador])
+                    else:
+                        print("\n"*3)
+                        imprimirTabuleiro(linhas = [3, 5], msgs = ["Agora é a vez do jogador %s"%jogador, "Você deve comer a peça do oponente!"], possiveisComidas = jogada)
+            else:
+                print("\n"*3)
+                imprimirTabuleiro(linhas = [3, 5], msgs = ["Agora é a vez do jogador %s"%jogador, "Jogada Inválida!"])
         else:
             print("\n"*3)
             imprimirTabuleiro(linhas = [3, 5], msgs = ["Agora é a vez do jogador %s"%jogador, "Jogada Inválida!"])
-    else:
-        print("\n"*3)
-        imprimirTabuleiro(linhas = [3, 5], msgs = ["Agora é a vez do jogador %s"%jogador, "Jogada Inválida!"])
+
+
+Main()
