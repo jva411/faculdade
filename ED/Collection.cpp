@@ -29,18 +29,25 @@ template <typename T> struct Collection {
     }
 
     T remove(int index){
-        if(index<0 || index>=size) throw "IndexOutOfRangeException";
+        if(index<0 || index>=size) {
+            try{
+                T arr[size];
+                arr[index];
+            }catch(exception& e){
+                std::cerr << e.what() << "IndexOutOfRange";
+            }
+        }
         size--;
-        T *temp = &vetor[index];
-        for(int i=index; i<size;) vetor[i] = vetor[++i];
-        return *temp;
+        T temp = vetor[index];
+        for(int i=index; i<size; i++) vetor[i] = vetor[i + 1];
+        return temp;
     }
 
     void print(){
         cout << '[';
         for(int i=0; i<size; i++){
             if(i == 0) cout << vetor[i];
-            else cout << vetor[i] << ", ";
+            else cout << ", " << vetor[i];
         }
         cout << "]\n";
     }
@@ -50,8 +57,9 @@ template <typename T> struct Collection {
 int main(){
     Collection<int> c;
     c.init();
-    c.add(5);
-    c.add(6);
-    c.print();
+    for(int i=0; i<65; i++) c.add(i);
+    cout << '[';
+    for(int i=0; i<66; i++) cout << c.remove(0) << ", ";
+    cout << "]\n";
     return 0;
 }
