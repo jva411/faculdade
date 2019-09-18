@@ -1,4 +1,3 @@
-#include <iostream>
 #include <stdlib.h>
 #include <new>
 
@@ -34,7 +33,7 @@ template <typename T> class Collection {
         }
         size--;
         T *temp = vetor[index];
-        if(size <= max/4){
+        if(size < max/4){
             T* *temp2 = new(nothrow) T*[max/2];
             if(temp2==nullptr) throw "MemoryOutOfBoundException";
             for(int i=0; i<index; i++) temp2[i] = vetor[i];
@@ -51,6 +50,10 @@ template <typename T> class Collection {
             return new T;
         }
         return vetor[index];
+    }
+
+    public: int size(){
+        return size;
     }
 
 };
