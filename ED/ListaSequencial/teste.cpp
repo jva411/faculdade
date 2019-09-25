@@ -1,7 +1,6 @@
 #include <iostream>
-#include "ListaSequencial.cpp"
-
 using namespace std;
+#include "ListaSequencial.cpp"
 
 int main(){
     ListaSequencial<int> ls;

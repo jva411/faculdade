@@ -1,8 +1,4 @@
-#include <stdlib.h>
-#include <new>
 #include "Collection.cpp"
-
-using namespace std;
 
 template <typename T> class Pilha : protected Collection<T> {
 

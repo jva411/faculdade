@@ -1,14 +1,10 @@
-#include <stdlib>
 #include <new>
 
-template <typename T> struct No {
-    int chave;
-    T *info;
-};
+using namespace std;
 
 template <typename T> struct ListaSequencial {
 
-    protected: No<T>* *vetor;
+    protected: T* *vetor;
     protected: int size, max;
 
     public: void init(){
@@ -18,7 +14,7 @@ template <typename T> struct ListaSequencial {
         if(vetor == nullptr) throw "MemoryOutOfBoundException";
     }
 
-    public: void add(int chave, T* x){
+    public: void add(T* x){
         if(size == max){
             T* *temp = new(nothrow) T*[max*2];
             if(temp == nullptr) throw "MemoryOutOfBoundException";
@@ -27,35 +23,26 @@ template <typename T> struct ListaSequencial {
             vetor = temp;
             max *= 2;
         }
-        No<T> no = new No<T>;
-        no.chave = chave;
-        no.info = x;
-        vetor[size++] = &no;
+        vetor[size++] = x;
     }
 
-    public: T* remove(int chave){
-        T* temp = (T*) nullptr;
-        for(int i=0; i<size; i++) {
-            if((*vetor[i]).chave == chave){
-                size--;
-                temp = (*vetor[i]).info;
-                vetor[i] = vetor[size];
-                break;
-            }
-        }
+    public: T* remove(int index){
+        if(i<0 || i >= size) throw "IndexOutOfRangeException"; 
+        T *temp = vetor[index];
+        vetor[index] = vetor[--size];
         if(size < max/4){
-            No<T>* *temp = new(nothrow) No<T>*[max/2];
-            if(temp == nullptr) throw "MemoryOutOfBoundException";
-            for(int i=0; i<size; i++) temp[i] = vetor[i];
+            T* *Temp = new(nothrow) No<T>*[max/2];
+            if(Temp == nullptr) throw "MemoryOutOfBoundException";
+            for(int i=0; i<size; i++) Temp[i] = vetor[i];
             delete vetor[];
-            vetor = temp;
+            vetor = Temp;
         }
         return temp;
     }
 
-    public: T* get(int chave){
-        for(int i=0; i<size; i++) if((*vetor[i]).chave == chave) return (*vetor[i]).info;
-        return (T*) nullptr;
+    public: T* get(int index){
+        if(i<0 || i >= size) throw "IndexOutOfRangeException"; 
+        return vetor[index];
     }
 
     public: int size(){
