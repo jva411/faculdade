@@ -1,25 +1,25 @@
 #include "ListaSequencial.cpp"
 
-temaplate <typename T> struct Pilha : protected ListaSequencial<T> {
+template <typename T> struct Pilha : protected ListaSequencial<T> {
 
     private: int topo;
 
     public: void init(){
-        ListaSequencial::init();
+        ListaSequencial<T>::init();
         topo = -1;
     }
 
     public: void add(T *x){
-        ListaSequencial::add(x);
+        ListaSequencial<T>::add(x);
         topo ++;
     }
 
     public: T* remove(){
-        return ListaSequencial::remove(topo--);
+        return ListaSequencial<T>::remove(topo--);
     }
 
     public: int size(){
-        return ListaSequencial::size();
+        return ListaSequencial<T>::size();
     }
 
-}
+};

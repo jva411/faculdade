@@ -1,13 +1,34 @@
 #include <iostream>
+#include <stdlib.h>
+
 using namespace std;
-#include "ListaSequencial.cpp"
+
+#include "Pilha.cpp"
+
+struct Base {
+    virtual void teste();
+    void init(){
+        teste();
+    }
+
+};
+
+struct Derived : public Base{
+    virtual void teste() override{
+        cout << "teste\n";
+    }
+    void init(){
+        Base::init();
+    }
+};
 
 int main(){
-    ListaSequencial<int> ls;
-    int chaves[1] = {1};
-    ls.init();
-    ls.add(new int(5), 1);
-    for(int i=0; i<1; i++) cout << *ls.get(chaves[i]) << '\n';
-    for(int i=0; i<1; i++) cout << *ls.remove(chaves[i]) << '\n';
+    // Pilha<int> P;
+    // P.init();
+    // for(int i=0; i<5; i++) P.add(new int(i));
+    // for(int i=0; i<5; i++) cout << *P.remove() << " ";
+    // cout << "\n";
+    Derived d;
+    d.init();
     return 0;
 }

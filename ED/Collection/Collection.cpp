@@ -52,7 +52,7 @@ template <typename T> class Collection {
         return vetor[index];
     }
 
-    public: int size(){
+    public: int Size(){
         return size;
     }
 

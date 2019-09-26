@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <new>
 
 using namespace std;
@@ -27,26 +28,30 @@ template <typename T> struct ListaSequencial {
     }
 
     public: T* remove(int index){
-        if(i<0 || i >= size) throw "IndexOutOfRangeException"; 
+        if(index<0 || index >= size) throw "IndexOutOfRangeException"; 
         T *temp = vetor[index];
         vetor[index] = vetor[--size];
         if(size < max/4){
-            T* *Temp = new(nothrow) No<T>*[max/2];
+            T* *Temp = new(nothrow) T*[max/2];
             if(Temp == nullptr) throw "MemoryOutOfBoundException";
             for(int i=0; i<size; i++) Temp[i] = vetor[i];
-            delete vetor[];
+            delete[] vetor;
             vetor = Temp;
         }
         return temp;
     }
 
     public: T* get(int index){
-        if(i<0 || i >= size) throw "IndexOutOfRangeException"; 
+        if(index<0 || index >= size) throw "IndexOutOfRangeException"; 
         return vetor[index];
     }
 
-    public: int size(){
+    public: int Size(){
         return size;
+    }
+
+    public: bool isFull(){
+        return size==max;
     }
 
 };
