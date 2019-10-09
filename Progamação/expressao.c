@@ -58,10 +58,10 @@ int validar(char c, int caso){
   return boolean || c==')' || isNumber(c);
 }
 
-void printarInvalida(char* str, int i){
-  printf("A expressão está inválida!\n");
+void printarInvalida(char* str, int i, char* msg){
+  printf("A expressão é inválida: %s\n", msg);
   printf("%s\n", str);
-  for(int i2=0; i2<i; i2++) printf("~");
+  for(int i2=0; i2<i; i2++) printf(" ");
   printf("%c\n", '^');
   exit(0);
 }
@@ -74,38 +74,37 @@ void main(){
   // ) --> O || \0                (4º caso)
   // N --> N || O || fecha || \0  (5º caso)
   // \0 <-- Todos abertos foram fechados (último caso)
-  char *exp = "(1+2)*3";
+  char *exp = "(1+7)013+2)*3";
   int n = 0;
   for(;exp[n++];);
-  n--;
   Pilha *P = iniciarP(n+1);
   for(int i=0; exp[i]; i++) {
     adicionarP(P, exp[n-i-1]);
-    printPilha(P);
   }
-  adicionarP(P, exp[n-1]);
-  printPilha(P);
+  adicionarP(P, exp[0]);
+  int abertos = 0;
+  char ultimo;
   for(int i=0; i<n; i++){
     if(i==0) {
-      if(!validar(removerP(P), 1)) printarInvalida(exp, i);
+      ultimo = removerP(P);
+      if(!validar(ultimo, 1)) printarInvalida(exp, i, "esperando um número ou parêntese aberto!");
     }else{
-      char c = removerP(P);
-      switch(c){
-        char c2;
-        case '(':
-          c2 = removerP(P);
-          adicionarP(P, c2);
-          if(!validar(c2, 3)) printarInvalida(exp, i);
-          break;
-        case ')':
-          c2 = removerP(P);
-          adicionarP(P, c2);
-          if(!validar(c2, 4)) printarInvalida(exp, i);
-        case '\0':
-          break;
-        default:
-          break;
-      }
+      char c2 = removerP(P);
+      if(ultimo == '('){
+        if(!validar(c2, 3)) printarInvalida(exp, i, "esperando um número ou parêntese aberto");
+        abertos++;
+      }else if(ultimo == ')'){
+        if(abertos==0) printarInvalida(exp, i-1, "fechando parêntese nunca aberto!");
+        if(!validar(c2, 4)) printarInvalida(exp, i, "esperando um operador ou parêntese fechado!");
+        abertos--;
+      }else if(isNumber(ultimo)){
+        if(!validar(c2, 5)) printarInvalida(exp, i, "esperando um operador, parêntese fechado ou número!");
+      }else if(isOperator(ultimo)){
+        if(!validar(c2, 2)) printarInvalida(exp, i, "esperando um número ou parêntese aberto!");
+      }else printarInvalida(exp, i-1, "símbolo desconhecido!");
+      if(c2 == '\0' && abertos != 0) printarInvalida(exp, i, "algum parêntese ficou aberto!");
+      ultimo = c2;
     }
   }
+  printf("Essa expressão é válida!\n");
 }
