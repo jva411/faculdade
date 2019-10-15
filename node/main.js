@@ -1,7 +1,15 @@
-const ponto = require('./ponto.js');
+const ytdl = require('ytdl-core')
+const yts = require('yt-search')
 
-var p = new ponto.Ponto(0, 3);
-var p2 = new ponto.Ponto(4, 0);
-console.log(p.x + ' ' + p.y);
-console.log(p2.x + ' ' + p2.y);
-console.log(p.distance(p2));
+let search = "morro do dende"
+
+yts(search, (err, res) => {
+    if(!err){
+        let video = res.videos[0]
+        console.log(video)
+        console.log(ytdl.validateURL(video.url))
+        ytdl.getInfo(`${video.videoId}`, (err, info) => {
+            console.log(info)
+        })
+    }
+})
