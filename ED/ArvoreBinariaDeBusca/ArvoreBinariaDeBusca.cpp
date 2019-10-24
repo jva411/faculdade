@@ -4,71 +4,129 @@
 
 using namespace std;
 
-template <typename T> class No{
-    public: int chave;
-    public: T *info;
-    public: No<T> *pai, *esq, *dir;
+template <typename T> struct No{
+    int chave;
+    T *info;
+    No<T> *pai, *esq, *dir;
 };
 
-template <typename T> class ArvoreBinariaDeBusca {
+template <typename T> struct ArvoreBinariaDeBusca {
 
-    private: No<T>* *vetor;
-    private: int max, size;
+    private: void *nullptr;
+    private: int size;
+    private: No<T> *root;
 
     public: void init(){
-        max = 1;
+        nullptr = 0;
         size = 0;
-        vetor = new(nothrow) No<T>*[max];
-        if(vetor == 0) throw "MemoryOutOfBoundException";
+        root = (No<T>*) nullptr;
+    }
+
+    public: T *get(int chave){
+        No<T> *no = Get(chave);
+        if(no == nullptr) return nullptr;
+        return no->info;
     }
 
     private: No<T>* Get(int chave){
-        No<T>* p = vetor[0];
-        while(p != 0 && p.chave != chave){
-            if(chave <= p.chave) p = p.esq;
-            else p = p.dir;
+        No<T>* p = root;
+        while(p != nullptr && p->chave != chave){
+            if(chave < p->chave) p = p->esq;
+            else p = p->dir;
         }
         return p;
     }
 
     public: void add(int chave, T *x){
-        if(size == max){
-            max *= 2;
-            No<T>* *temp = new(nothrow) No<T>*[max];
-            if(temp == 0) throw "MemoryOutOfBoundException";
-            for(int i=0; i<size; i++) temp[i] = vetor[i];
-            delete[] vetor;
-            vetor = temp;
+        No<T> *no = new No<T>, *p = (No<T>*) nullptr, **q = &root;
+        while(*q != nullptr){
+            p = *q;
+            if(chave < p->chave) q = &p->esq;
+            else q = &p->dir;
         }
-        No<T> no = *(new No<T>), *p = vetor[0], **p2;
-        no.chave = chave;
-        no.info = x;
-        if(p == 0) vetor[0] = &no;
-        else{
-            if((*p).chave > chave) p2 = &(*p).dir;
-            else p2 = &(*p).esq;
-            while(*p2 != 0){
-                p = *p2;
-                if((*p).chave > chave) p2 = &(*p).dir;
-                else p2 = &(*p).esq;
-            }
-            *p2 = &no;
-            no.pai = p;
-            vetor[size] = &no;
-        }
+        no->chave = chave;
+        no->info = x;
+        no->pai = p;
+        *q = no;
         size++;
     }
 
+    public: T* rem(int chave){
+        No<T> *no = Get(chave);
+        if(no == nullptr) return (T*) nullptr;
+        if(no->esq == nullptr) return Rem(no, no->dir);
+        else if(no->dir == nullptr) return Rem(no, no->esq);
+        else{
+            No<T> *y = sucessor(no);
+            transplate(y, y->dir);
+            y->dir = no->dir;
+            y->esq = no->esq;
+            y->esq->pai = y;
+            y->dir->pai = y;
+            return Rem(no, y);
+        }
+    }
+
+    private: T* Rem(No<T> *p, No<T> *q){
+        transplate(p, q);
+        T* x = q->info;
+        free(q->pai);
+        free(q->esq);
+        free(q->dir);
+        free(q);
+        return x;
+    }
+
+
+
+
+
+
+
+
+
+
+    private: void transplate(No<T> *p, No<T> *q){
+        if(p->pai == nullptr) root = q;
+        else if(p == p->pai->esq) p->pai->esq = q;
+        else p->pai->dir = q;
+        if(q != nullptr) q->pai = p->pai;
+    }
+
+    private: void Free(No<T> *Root){
+        if(Root != nullptr){
+            Free(Root->esq);
+            Free(Root->dir);
+            free(Root);
+        }
+    }
+
+    private: No<T> *sucessor(No<T> *no){
+        No<T> *p;
+        if(no->dir == nullptr){
+            p = no->pai;
+            while(p != nullptr && no == p->dir) {
+                no = p;
+                p = p->pai;
+            }
+            if(p == nullptr) return p;
+            return no;
+        }
+        p = no->dir;
+        while(p != nullptr && p->esq != nullptr) p = p->esq;
+        return p;
+    }
+
     public: void print(){
-        printEmOrdem(vetor[0]);
+        printEmOrdem(root);
         cout << '\n';
     }
 
     private: void printEmOrdem(No<T> *p){
-        if(p != 0){
-            printEmOrdem((*p).esq);
-            cout << *(*p).info << ' ';
-            printEmOrdem((*p).dir);
+        if(p != nullptr){
+            printEmOrdem(p->esq);
+            cout << *p->info << ' ';
+            printEmOrdem(p->dir);
         }
     }
 
