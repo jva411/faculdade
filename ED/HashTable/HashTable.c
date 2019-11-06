@@ -4,33 +4,31 @@ typedef struct Node Node;
 typedef struct hashtable HashTable;
 
 struct Node{
-    int KeyInt, Prox, hash;
+    int* KeyInt;
     char* KeyChar;
     void *Value;
 };
 
-Node *newNodeInt(int key, void *value, int hash){
+Node *newNodeInt(int key, void *value){
     Node *no = (Node*) malloc(sizeof(Node));
-    no->KeyInt = key;
+    no->KeyInt = (int*) malloc(sizeof(int));
+    *no->KeyInt = key;
     no->KeyChar = 0;
     no->Value = value;
-    no->Prox = -1;
-    no->hash = hash;
     return no;
 }
-Node *newNodeStr(char* key, void *value, int hash){
+Node *newNodeStr(char* key, void *value){
     Node *no = (Node*) malloc(sizeof(Node));
     no->KeyInt = 0;
     no->KeyChar = key;
     no->Value = value;
-    no->Prox = -1;
-    no->hash = hash;
     return no;
 }
 
 struct hashtable{
-    Node* *vetor;
+    Node* *vetor, *null;
     int n, m, min;
+    float coef1, coef2;
 };
 
 void redimensionar(HashTable*, int);
@@ -41,6 +39,9 @@ HashTable *newHashTable(){
     ht->m = ht->min;
     ht->n = 0;
     ht->vetor = (Node**) malloc(sizeof(Node) * ht->m);
+    ht->null = newNodeInt(0, 0);
+    ht->coef1 = 1.25;
+    ht->coef2 = 5;
     for(int i=0; i < ht->m; i++) ht->vetor[i] = 0;
     return ht;
 }
@@ -59,65 +60,91 @@ int hashStr(char* key, HashTable *ht){
 }
 
 void putStr(HashTable *ht, char* key, void *value){
-    if((float)ht->n / (float)ht->m > 0.9) redimensionar(ht, ht->m*2);
-    int hash = hashStr(key, ht), j = hash, ant = -1, aux = 1;
+    if((float)ht->n / (float)ht->m > 0.9) redimensionar(ht, ht->m*ht->coef1 + ht->coef2);
+    int j = hashStr(key, ht);
     while(ht->vetor[j] != 0){
-        if(aux) ant = j;
-        j = ht->vetor[j]->Prox;
-        if(j == -1) {
-            j = hashInt(ant+1, ht);
-            aux = 0;
-        }
+        j++;
+        if(j==ht->m) j=0;
     }
-    if(ant != -1) ht->vetor[ant]->Prox = j;
-    ht->vetor[j] = newNodeStr(key, value, hash);
+    ht->vetor[j] = newNodeStr(key, value);
     ht->n++;
 }
 void putInt(HashTable *ht, int key, void *value){
-    if((float)ht->n / (float)ht->m > 0.9) redimensionar(ht, ht->m*2);
-    int hash = hashInt(key, ht), j = hash, ant = -1, aux = 1;
+    if((float)ht->n / (float)ht->m > 0.9) redimensionar(ht, ht->m*ht->coef1 + ht->coef2);
+    int j = hashInt(key, ht);
     while(ht->vetor[j] != 0){
-        if(aux) ant = j;
-        j = ht->vetor[j]->Prox;
-        if(j == -1) {
-            j = hashInt(ant+1, ht);
-            aux = 0;
-        }
+        j++;
+        if(j==ht->m) j=0;
     }
-    if(ant != -1) ht->vetor[ant]->Prox = j;
-    ht->vetor[j] = newNodeInt(key, value, hash);
+    ht->vetor[j] = newNodeInt(key, value);
     ht->n++;
 }
 
 void *getStr(HashTable *ht, char* key){
     int j = hashStr(key, ht);
-    while(j != -1 && ht->vetor[j] != 0 && strcmp(ht->vetor[j]->KeyChar, key)!=0){
-        j = ht->vetor[j]->Prox;
+    while(ht->vetor[j] != 0 && (ht->vetor[j]->KeyChar == 0 || strcmp(key, ht->vetor[j]->KeyChar) != 0)){
+        j++;
+        if(j == ht->m) j=0;
     }
-    if(j == -1) return 0;
+    if(ht->vetor[j] == 0) return 0;
     return ht->vetor[j]->Value;
 }
 void *getInt(HashTable *ht, int key){
     int j = hashInt(key, ht);
-    while(j != -1 && ht->vetor[j] != 0 && ht->vetor[j]->KeyInt != key){
-        j = ht->vetor[j]->Prox;
+    while(ht->vetor[j] != 0 && (ht->vetor[j]->KeyInt == 0 || *ht->vetor[j]->KeyInt != key)){
+        j++;
+        if(j == ht->m) j=0;
     }
-    if(j == -1) return 0;
+    if(ht->vetor[j] == 0) return 0;
     return ht->vetor[j]->Value;
 }
 
+void *remStr(HashTable *ht, char* key){
+    if(((float)ht->m / (float)ht->n) < 0.7) redimensionar(ht, (ht->m -ht->coef2) / ht->coef1);
+    int j = hashStr(key, ht);
+    while(ht->vetor[j] != 0 && (ht->vetor[j] == ht->null || strcmp(key, ht->vetor[j]->KeyChar) != 0)){
+        j++;
+        if(j == ht->m) j=0;
+    }
+    if(ht->vetor[j] == 0) return 0;
+    ht->n--;
+    void *p = ht->vetor[j];
+    ht->vetor[j] = ht->null;
+    return p;
+}
+void *remInt(HashTable *ht, int key){
+    int j = hashInt(key, ht);
+    while(ht->vetor[j] != 0 && (ht->vetor[j]->KeyInt == 0 || *ht->vetor[j]->KeyInt != key)){
+        j++;
+        if(j == ht->m) j=0;
+    }
+    if(ht->vetor[j] == 0) return 0;
+    ht->n--;
+    void *p = ht->vetor[j];
+    ht->vetor[j] = ht->null;
+    return p;
+}
+
 void redimensionar(HashTable *ht, int newSize){
+    if(newSize < 10) newSize = 10;
     HashTable *Ht = newHashTable();
     Ht->m = newSize;
     Ht->vetor = (Node**) malloc(sizeof(Node) * Ht->m);
     for(int i=0; i<ht->m; i++){
         if(ht->vetor[i] != 0){
-            if(ht->vetor[i]->KeyChar == 0) putInt(Ht, ht->vetor[i]->KeyInt, ht->vetor[i]->Value);
-            else putStr(Ht, ht->vetor[i]->KeyChar, ht->vetor[i]->Value);
+            if(ht->vetor[i]->KeyChar == 0) {
+                putInt(Ht, *ht->vetor[i]->KeyInt, ht->vetor[i]->Value);
+                free(ht->vetor[i]->KeyInt);
+            }else {
+                putStr(Ht, ht->vetor[i]->KeyChar, ht->vetor[i]->Value);
+                free(ht->vetor[i]->KeyChar);
+            }
         }
+        free(ht->vetor[i]);
     }
     free(ht->vetor);
     ht->vetor = Ht->vetor;
     ht->m = newSize;
+    free(Ht->null);
     free(Ht);
 }
