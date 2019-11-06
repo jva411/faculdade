@@ -17,16 +17,20 @@ char *GET(int i){
 }
 
 int main() {
-    struct timespec t0={0, 0}, t1={0, 0}, t2={0, 0};
+    struct timespec t0, t1, t2;
     HashTable *ht = newHashTable();
     // for(int i=0; i<10; i++) putInt(ht, i, GET(i));
-    clock_gettime(CLOCK_MONOTONIC, &t0);
-    for(int i=0; i<50000000; i++) putInt(ht, i, GET(i));
-    clock_gettime(CLOCK_MONOTONIC, &t1);
-    sleep(1);
-    clock_gettime(CLOCK_MONOTONIC, &t2);
-    printf("%lf %lf %lf\n", t0.tv_sec+1.0e-9, t1.tv_sec+1.0e-9, t2.tv_sec+1.0e-9);
-    printf("%ld\n", t1.tv_sec - t0.tv_sec);
-    printf("%ld\n", t2.tv_sec - t1.tv_sec);
+    printf("Start\n");
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
+    for(int i=0; i<5000000; i++) putInt(ht, i, GET(i));
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
+    printf("End\n");
+    // sleep(5);
+    // clock_gettime(CLOCK_MONOTONIC, &t2);
+    long int delta_us = (t1.tv_sec - t0.tv_sec) * 1000 + (t0.tv_nsec - t1.tv_nsec) / 1000000;
+    printf("%ld %ld %ld\n", t0.tv_nsec, t1.tv_nsec, t2.tv_nsec);
+    printf("%ld\n", (t1.tv_nsec - t0.tv_nsec)/1000000);
+    printf("%ld\n", delta_us);
+    // printf("%ld\n", (t2.tv_nsec - t1.tv_nsec)/1000000);
     return 0;
 }
