@@ -27,7 +27,6 @@ int main() {
     for(int i=0; i<5000000; i++) putInt(ht, i, GET(i));
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
     printf("End\n");
-    sleep(5);
     printf("%ld\n", DELTA_MS(t0, t1));
     return 0;
 }
