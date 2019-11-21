@@ -24,7 +24,7 @@ int main() {
     // for(int i=0; i<10; i++) putInt(ht, i, GET(i));
     printf("Start\n");
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
-    for(int i=0; i<250000; i++) putStr(ht, GET(i), (int*) malloc(sizeof(int)));
+    for(int i=0; i<350000; i++) putStr(ht, GET(i), (int*) malloc(sizeof(int)));
     // for(int i=0; i<5000000; i++) putInt(ht, i, GET(i));
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
     printf("End\n");

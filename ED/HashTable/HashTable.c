@@ -53,7 +53,8 @@ int hashInt(int key, HashTable *ht){
 int hashStr(char* key, HashTable *ht){
     int i=0, hash=0;
     while(key[i]){
-        hash += (key[i]<<13);
+        // hash += (key[i]*8193);
+        hash = hash*8193 + key[i]*8193;
         i++;
     }
     return hashInt(hash, ht);
