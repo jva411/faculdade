@@ -53,7 +53,7 @@ int hashInt(int key, HashTable *ht){
 int hashStr(char* key, HashTable *ht){
     int i=0, hash=0;
     while(key[i]){
-        hash += (key[i]<<5);
+        hash += (key[i]<<13);
         i++;
     }
     return hashInt(hash, ht);
@@ -137,7 +137,6 @@ void redimensionar(HashTable *ht, int newSize){
                 free(ht->vetor[i]->KeyInt);
             }else {
                 putStr(Ht, ht->vetor[i]->KeyChar, ht->vetor[i]->Value);
-                free(ht->vetor[i]->KeyChar);
             }
         }
         free(ht->vetor[i]);
