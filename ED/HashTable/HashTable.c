@@ -65,7 +65,7 @@ int hashStr(char* key, HashTable *ht){
 void putStr(HashTable *ht, char* key, void *value){
     if((float)ht->n / (float)ht->m > 0.9) redimensionar(ht, ht->m*ht->coef1 + ht->coef2);
     int j = hashStr(key, ht);
-    while(ht->vetor[j] != 0){
+    while(ht->vetor[j] != 0 && strcmp(ht->vetor[j]->KeyChar, key) != 0){
         j++;
         if(j==ht->m) j=0;
     }
