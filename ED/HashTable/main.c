@@ -18,14 +18,29 @@ char *GET(int i){
     return str;
 }
 
+char *getRandom(){
+    char* str = (char*) malloc(sizeof(char)*10);
+    for(int i=0; i<9; i++){
+        if(rand()%2 == 0){
+            str[i] = (rand() % 10) + '0';
+        }else{
+            str[i] = (rand() % 26) + 'A';
+        }
+    }
+    str[9] = 0;
+    return str;
+}
+
 int main() {
+    srand(time(0));
     struct timespec t0, t1;
     HashTable *ht = newHashTable();
     // for(int i=0; i<10; i++) putInt(ht, i, GET(i));
     printf("Start\n");
     clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
-    for(int i=0; i<350000; i++) putStr(ht, GET(i), (int*) malloc(sizeof(int)));
-    // for(int i=0; i<5000000; i++) putInt(ht, i, GET(i));
+    for(int i=0; i<1000000; i++) putStr(ht, getRandom(), (int*) malloc(sizeof(int)));
+    // for(int i=0; i<500000; i++) putStr(ht, GET(i), (int*) malloc(sizeof(int)));
+    // for(int i=0; i<5000000; i++) putInt(ht, (ht->m * i), GET(i));
     clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
     printf("End\n");
     printf("%ld\n", DELTA_MS(t0, t1));
