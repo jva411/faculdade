@@ -54,6 +54,7 @@ Hashtable *newHashtable(){
 }
 
 void set(Hashtable *this, unsigned int key, void *value){
+    
     if(value == 0) return remove(this, key);
     if(Hashtable_RESIZE_CONDITION_1) redimensionar(this, Hashtable_RESIZE_OPERATION_1);
     unsigned int Hash = hash(this, key);
@@ -66,6 +67,7 @@ void set(Hashtable *this, unsigned int key, void *value){
     }else{
         this->vetor[Hash]->Value = value;
     }
+    
 }
 
 void *remove(Hashtable *this, unsigned int key){
@@ -102,7 +104,7 @@ void redimensionar(Hashtable *this, int unsigned newSize){
     Hashtable *Ht = newHashtable();
     Ht->m = newSize;
     Ht->vetor = (Hashtable_Node* *) malloc(sizeof(Hashtable_Node) * Ht->m);
-    for(int i=0; i<this->m; i++) Ht->vetor[i] = 0;
+    for(int i=0; i<Ht->m; i++) Ht->vetor[i] = 0;
     for(int i=0; i<this->m; i++){
         if(this->vetor[i]){
             set(Ht, this->vetor[i]->Key, this->vetor[i]->Value);
