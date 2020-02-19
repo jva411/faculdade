@@ -28,15 +28,15 @@ Hashtable_Node *Null = 0;
 Hashtable *newHashtable(){
 
     Hashtable *this = (Hashtable *) malloc(sizeof(Hashtable));
-    this->size = 0;
+    this->n = 0;
     this->m = Hashtable_MIN;
     if(!Null){
         Null = (Hashtable_Node*) malloc(sizeof(Hashtable_Node));
         Null->key = 0;
         Null->value = 0;
     }
-    this->vetor = (Hashtable_Node* *) malloc(sizeof(Hashtable_Node *) * this->max);
-    for(int i=0; i<this->max; i++) this->vetor[i] = 0;
+    this->vetor = (Hashtable_Node* *) malloc(sizeof(Hashtable_Node *) * this->m);
+    for(int i=0; i<this->m; i++) this->vetor[i] = 0;
     this->set = set;
     this->get = get;
     this->remove = remove;
@@ -53,7 +53,7 @@ unsigned int hash(Hashtable *this, char *key){
     for(int i=0; key[i]; i++){
         hash = hash*8193 + key[i]*8193;
     }
-    return hash % this->max;
+    return hash % this->m;
 
 }
 
@@ -73,7 +73,7 @@ void set(Hashtable *this, char* key, void *value){
     int Hash = hash(this, key);
     while(this->vetor[Hash] && this->vetor[Hash] != Null && !compareKeys(key, this->vetor[Hash]->key)){
         Hash++;
-        if(Hash == this->max) Hash=0;
+        if(Hash == this->m) Hash=0;
     }
     if(this->vetor[Hash] && this->vetor[Hash] != Null) {
         this->vetor[Hash]->value = value;
@@ -81,15 +81,15 @@ void set(Hashtable *this, char* key, void *value){
         this->vetor[Hash] = (Hashtable_Node *) malloc(sizeof(Hashtable_Node));
         this->vetor[Hash]->key = key;
         this->vetor[Hash]->value = value;
-        this->size++;
+        this->n++;
     }
 }
 
 void *get(Hashtable *this, void *key, unsigned int size){
     int Hash = hash(this, key, size);
-    while(this->vetor[Hash] == Null || this->vetor[Hash] && !compareKeys(key, size, this->vetor[Hash]->key, this->vetor[Hash]->keySize)){
+    while(this->vetor[Hash] == Null || this->vetor[Hash] && !compareKeys(key, size, this->vetor[Hash]->key)){
         Hash++;
-        if(Hash == this->max) Hash=0;
+        if(Hash == this->m) Hash=0;
     }
     if(this->vetor[Hash]) return this->vetor[Hash]->value;
     return 0;
@@ -98,13 +98,13 @@ void *get(Hashtable *this, void *key, unsigned int size){
 void *remove(Hashtable *this, void *key, unsigned int size){
     if(Hashtable_RESIZE_CONDITION_2) redimensionar(this, Hashtable_RESIZE_OPERATION_2);
     int Hash = hash(this, key, size);
-    while(this->vetor[Hash] == Null || (this->vetor[Hash] && !compareKeys(key, size, this->vetor[Hash]->key, this->vetor[Hash]->keySize))){
+    while(this->vetor[Hash] == Null || (this->vetor[Hash] && !compareKeys(key, size, this->vetor[Hash]->key))){
         Hash++;
-        if(Hash == this->max) Hash=0;
+        if(Hash == this->m) Hash=0;
     }
     if(this->vetor[Hash]){
         void *value = this->vetor[Hash]->value;
-        this->size--;
+        this->n--;
         free(this->vetor[Hash]);
         this->vetor[Hash] = Null;
         return value;
@@ -113,20 +113,20 @@ void *remove(Hashtable *this, void *key, unsigned int size){
 }
 
 void redimensionar(Hashtable *this, int newSize){
-    if(newSize < this->min) newSize = this->min;
+    if(newSize < Hashtable_MIN) newSize = Hashtable_MIN;
     Hashtable *Ht = newHashtable();
-    Ht->max = newSize;
-    Ht->vetor = (Hashtable_Node* *) malloc(sizeof(Hashtable_Node) * Ht->max);
-    for(int i=0; i<this->max; i++) Ht->vetor[i] = 0;
-    for(int i=0; i<this->max; i++){
+    Ht->m = newSize;
+    Ht->vetor = (Hashtable_Node* *) malloc(sizeof(Hashtable_Node) * Ht->m);
+    for(int i=0; i<Ht->m; i++) Ht->vetor[i] = 0;
+    for(int i=0; i<this->m; i++){
         if(this->vetor[i] != 0){
-            this->set(this, this->vetor[i]->key, this->vetor[i]->keySize, this->vetor[i]->value);
+            this->set(this, this->vetor[i]->key, this->vetor[i]->value);
+            free(this->vetor[i]);
         }
-        free(this->vetor[i]);
     }
     free(this->vetor);
     this->vetor = Ht->vetor;
-    this->max = newSize;
+    this->m = newSize;
     free(Ht);
 }
 
