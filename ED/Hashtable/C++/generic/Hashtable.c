@@ -3,10 +3,10 @@
 
 #pragma region Functioncs declaration
 
-void set(Hashtable *, unsigned int, void *);
-void *remove(Hashtable *, unsigned int);
-void *get(Hashtable *, unsigned int);
-unsigned int hash(Hashtable *, unsigned int);
+void set(Hashtable *, void *, void *);
+void *remove(Hashtable *, void *);
+void *get(Hashtable *, void *);
+unsigned int hash(Hashtable *, void *);
 void redimensionar(Hashtable *, unsigned int);
 
 #pragma endregion
@@ -25,7 +25,7 @@ void redimensionar(Hashtable *, unsigned int);
 
 Hashtable_Node *Null = 0;
 
-Hashtable_Node *newHashtable_Node(unsigned int key, void *value){
+Hashtable_Node *newHashtable_Node(void *key, void *value){
 
     Hashtable_Node *htn = (Hashtable_Node *) malloc(sizeof(Hashtable_Node));
     htn->Key = key;
@@ -40,7 +40,7 @@ Hashtable *newHashtable(){
     ht->m = Hashtable_MIN;
     ht->n = 0;
     ht->vetor = (Hashtable_Node**) malloc(sizeof(Hashtable_Node) * ht->m);
-    for(int i=0; i < ht->m; i++) ht->vetor[i] = 0;
+    for(int i=ht->m-1; i; i--) ht->vetor[i] = 0;
     ht->remove = remove;
     ht->get = get;
     ht->set = set;
@@ -53,7 +53,7 @@ Hashtable *newHashtable(){
 
 }
 
-void set(Hashtable *this, unsigned int key, void *value){
+void set(Hashtable *this, void *key, void *value){
     
     if(value == 0) return remove(this, key);
     if(Hashtable_RESIZE_CONDITION_1) redimensionar(this, Hashtable_RESIZE_OPERATION_1);
@@ -70,7 +70,7 @@ void set(Hashtable *this, unsigned int key, void *value){
     
 }
 
-void *remove(Hashtable *this, unsigned int key){
+void *remove(Hashtable *this, void *key){
 
     if(Hashtable_RESIZE_CONDITION_2) redimensionar(this, Hashtable_RESIZE_OPERATION_2);
     unsigned int Hash = hash(this, key);
@@ -88,17 +88,24 @@ void *remove(Hashtable *this, unsigned int key){
 
 }
 
-void *get(Hashtable *this, unsigned int key){
+void *get(Hashtable *this, void *key){
+
     unsigned int Hash = hash(this, key);
     while(this->vetor[Hash] && ( this->vetor[Hash] == Null || this->vetor[Hash]->Key != key )){
         if(++Hash == this->m) Hash = 0;
     }
     if(this->vetor[Hash]) return this->vetor[Hash]->Value;
     return 0;
+
 }
 
-unsigned int hash(Hashtable *this, unsigned int key){
-    return (key * 8193) % this->m;
+unsigned int hash(Hashtable *this, void *key){
+    // unsigned int Hash = 0;
+    // int *p = (int *) key;
+    // for(int i=0; i<sizeof(key)/sizeof(int); i++){
+    //     Hash = Hash*8193 + p[i] * 8193;
+    // }
+    return ((unsigned long int)key * 8193)  % this->m;
 }
 
 void redimensionar(Hashtable *this, int unsigned newSize){
