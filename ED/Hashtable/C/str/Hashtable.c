@@ -127,6 +127,9 @@ void redimensionar(Hashtable *this, int unsigned newSize){
     free(this->vetor);
     this->vetor = Ht->vetor;
     this->m = newSize;
+    free(Ht->get);
+    free(Ht->remove);
+    free(Ht->set);
     free(Ht);
 }
 
