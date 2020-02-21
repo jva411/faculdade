@@ -77,12 +77,14 @@ void *remove(Hashtable *this, unsigned int key){
     while(this->vetor[Hash] && ( this->vetor[Hash] == Null || this->vetor[Hash]->Key != key )){
         if(++Hash == this->m) Hash = 0;
     }
-    if(!this->vetor[Hash]) return 0;
-    void *p = this->vetor[Hash]->Value;
-    free(this->vetor[Hash]);
-    this->vetor[Hash] = 0;
-    this->n--;
-    return p;
+    if(this->vetor[Hash]) {
+        void *p = this->vetor[Hash]->Value;
+        free(this->vetor[Hash]);
+        this->vetor[Hash] = Null;
+        this->n--;
+        return p;
+    }
+    return 0;
 
 }
 
@@ -104,10 +106,10 @@ void redimensionar(Hashtable *this, int unsigned newSize){
     Hashtable *Ht = newHashtable();
     Ht->m = newSize;
     Ht->vetor = (Hashtable_Node* *) malloc(sizeof(Hashtable_Node) * Ht->m);
-    for(int i=0; i<Ht->m; i++) Ht->vetor[i] = 0;
-    for(int i=0; i<this->m; i++){
+    for(int i=Ht->m-1; i; i--) Ht->vetor[i] = 0;
+    for(int i=this->m-1; i; i--){
         if(this->vetor[i]){
-            set(Ht, this->vetor[i]->Key, this->vetor[i]->Value);
+            if(this->vetor[i] != Null) set(Ht, this->vetor[i]->Key, this->vetor[i]->Value);
             free(this->vetor[i]);
         }
     }

@@ -112,15 +112,15 @@ void *remove(Hashtable *this, void *key, unsigned int size){
     return 0;
 }
 
-void redimensionar(Hashtable *this, int newSize){
+void redimensionar(Hashtable *this, int unsigned newSize){
     if(newSize < Hashtable_MIN) newSize = Hashtable_MIN;
     Hashtable *Ht = newHashtable();
     Ht->m = newSize;
     Ht->vetor = (Hashtable_Node* *) malloc(sizeof(Hashtable_Node) * Ht->m);
-    for(int i=0; i<Ht->m; i++) Ht->vetor[i] = 0;
-    for(int i=0; i<this->m; i++){
-        if(this->vetor[i] != 0){
-            this->set(this, this->vetor[i]->key, this->vetor[i]->value);
+    for(int i=Ht->m-1; i; i--) Ht->vetor[i] = 0;
+    for(int i=this->m-1; i; i--){
+        if(this->vetor[i]){
+            if(this->vetor[i] != Null) set(Ht, this->vetor[i]->key, this->vetor[i]->value);
             free(this->vetor[i]);
         }
     }
