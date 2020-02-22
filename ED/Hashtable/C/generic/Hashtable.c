@@ -115,8 +115,8 @@ void redimensionar(Hashtable *this, int unsigned newSize){
     Ht->vetor = (Hashtable_Node* *) malloc(sizeof(Hashtable_Node) * Ht->m);
     for(int i=Ht->m-1; i; i--) Ht->vetor[i] = 0;
     for(int i=this->m-1; i; i--){
-        if(this->vetor[i]){
-            if(this->vetor[i] != Null) set(Ht, this->vetor[i]->Key, this->vetor[i]->Value);
+        if(this->vetor[i] && this->vetor[i] != Null){
+            set(Ht, this->vetor[i]->Key, this->vetor[i]->Value);
             free(this->vetor[i]);
         }
     }
