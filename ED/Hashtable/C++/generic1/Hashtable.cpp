@@ -8,10 +8,10 @@ using namespace std;
 
 #pragma region Functioncs declaration
 
-void set(int, void *);
-void *remove(int);
-void *get(int);
-unsigned int hash(int);
+void set(void *, void *);
+void *remove(void *);
+void *get(void *);
+unsigned int hash(void *);
 void redimensionar(int);
 
 #pragma endregion
@@ -34,10 +34,9 @@ class Hashtable{
         class Node{
             
             public:
-                int key;
-                void *value;
+                void *key, *value;
 
-                Node(int key, void *value){
+                Node(void *key, void *value){
                     this->key = key;
                     this->value = value;
                 }
@@ -46,8 +45,8 @@ class Hashtable{
         Node* *vetor, *Null;
         int n, m;
 
-        unsigned int hash(unsigned int key){
-            return (key * 8193) % this->m;
+        unsigned int hash(void *key){
+            return ((( unsigned long int ) key) * 8193) % this->m;
         }
 
         void redimensionar(int unsigned newSize){
@@ -78,7 +77,7 @@ class Hashtable{
 
         }
 
-        void set(int key, void *value){
+        void set(void *key, void *value){
             
             if(value == 0) return (void) remove(key);
             if(Hashtable_RESIZE_CONDITION_1) redimensionar(Hashtable_RESIZE_OPERATION_1);
@@ -95,7 +94,7 @@ class Hashtable{
             
         }
 
-        void *remove(int key){
+        void *remove(void *key){
 
             if(Hashtable_RESIZE_CONDITION_2) redimensionar(Hashtable_RESIZE_OPERATION_2);
             unsigned int Hash = hash(key);
@@ -113,7 +112,7 @@ class Hashtable{
 
         }
 
-        void *get(int key){
+        void *get(void *key){
             unsigned int Hash = hash(key);
             while(this->vetor[Hash] && ( this->vetor[Hash] == Null || this->vetor[Hash]->key != key )){
                 if(++Hash == this->m) Hash = 0;
@@ -129,19 +128,19 @@ class Hashtable{
         /*
          * get function
          */
-        void *operator[](int key){
+        void *operator[](void *key){
             return get(key);
         }
         /*
          * set function
          */
-        void operator()(int key, void *value){
+        void operator()(void *key, void *value){
             set(key, value);
         }
         /*
          * remove function
          */
-        void *operator()(int key){
+        void *operator()(void *key){
             return remove(key);
         }
 

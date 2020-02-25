@@ -6,16 +6,6 @@
 
 using namespace std;
 
-#pragma region Functioncs declaration
-
-void set(int, void *);
-void *remove(int);
-void *get(int);
-unsigned int hash(int);
-void redimensionar(int);
-
-#pragma endregion
-
 #pragma region TEMP_DEFINEDS
 
 #define Hashtable_MIN 10
@@ -28,16 +18,17 @@ void redimensionar(int);
 
 #pragma endregion
 
+template <typename K, typename V>
 class Hashtable{
 
     private:
         class Node{
             
             public:
-                int key;
-                void *value;
+                K *key;
+                V *value;
 
-                Node(int key, void *value){
+                Node(K *key, V *value){
                     this->key = key;
                     this->value = value;
                 }
@@ -46,8 +37,24 @@ class Hashtable{
         Node* *vetor, *Null;
         int n, m;
 
-        unsigned int hash(unsigned int key){
-            return (key * 8193) % this->m;
+        void set(K *key, V *value){
+            
+            if(Hashtable_RESIZE_CONDITION_1) redimensionar(Hashtable_RESIZE_OPERATION_1);
+            unsigned int Hash = hash(key);
+            while(this->vetor[Hash] && this->vetor[Hash] != Null && this->vetor[Hash]->key != key ){
+                if(++Hash == this->m) Hash = 0;
+            }
+            if(!this->vetor[Hash] || this->vetor[Hash] == Null) {
+                this->vetor[Hash] = new Node(key, value);
+                this->n++;
+            }else{
+                this->vetor[Hash]->value = value;
+            }
+            
+        }
+
+        unsigned int hash(K &key){
+            return ((( unsigned long int ) &key) * 8193) % this->m;
         }
 
         void redimensionar(int unsigned newSize){
@@ -78,32 +85,31 @@ class Hashtable{
 
         }
 
-        void set(int key, void *value){
+        void set(K &key, V &value){
             
-            if(value == 0) return (void) remove(key);
             if(Hashtable_RESIZE_CONDITION_1) redimensionar(Hashtable_RESIZE_OPERATION_1);
             unsigned int Hash = hash(key);
-            while(this->vetor[Hash] && this->vetor[Hash] != Null && this->vetor[Hash]->key != key ){
+            while(this->vetor[Hash] && this->vetor[Hash] != Null && this->vetor[Hash]->key != &key ){
                 if(++Hash == this->m) Hash = 0;
             }
             if(!this->vetor[Hash] || this->vetor[Hash] == Null) {
-                this->vetor[Hash] = new Node(key, value);
+                this->vetor[Hash] = new Node(&key, &value);
                 this->n++;
             }else{
-                this->vetor[Hash]->value = value;
+                this->vetor[Hash]->value = &value;
             }
             
         }
 
-        void *remove(int key){
+        V *remove(K &key){
 
             if(Hashtable_RESIZE_CONDITION_2) redimensionar(Hashtable_RESIZE_OPERATION_2);
             unsigned int Hash = hash(key);
-            while(this->vetor[Hash] && ( this->vetor[Hash] == Null || this->vetor[Hash]->key != key )){
+            while(this->vetor[Hash] && ( this->vetor[Hash] == Null || this->vetor[Hash]->key != &key )){
                 if(++Hash == this->m) Hash = 0;
             }
             if(this->vetor[Hash]) {
-                void *p = this->vetor[Hash]->value;
+                V *p = this->vetor[Hash]->value;
                 free(this->vetor[Hash]);
                 this->vetor[Hash] = Null;
                 this->n--;
@@ -113,9 +119,9 @@ class Hashtable{
 
         }
 
-        void *get(int key){
+        V *get(K &key){
             unsigned int Hash = hash(key);
-            while(this->vetor[Hash] && ( this->vetor[Hash] == Null || this->vetor[Hash]->key != key )){
+            while(this->vetor[Hash] && ( this->vetor[Hash] == Null || this->vetor[Hash]->key != &key )){
                 if(++Hash == this->m) Hash = 0;
             }
             if(this->vetor[Hash]) return this->vetor[Hash]->value;
@@ -129,19 +135,19 @@ class Hashtable{
         /*
          * get function
          */
-        void *operator[](int key){
+        void *operator[](K &key){
             return get(key);
         }
         /*
          * set function
          */
-        void operator()(int key, void *value){
+        void operator()(K &key, V &value){
             set(key, value);
         }
         /*
          * remove function
          */
-        void *operator()(int key){
+        void *operator()(K &key){
             return remove(key);
         }
 
