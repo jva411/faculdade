@@ -2,26 +2,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <new>
-//#include "RedBlackTree.cpp"
+#include "RedBlackTree.cpp"
 
 using namespace std;
 
-class teste{
-    public:
-        int *null = (int *) malloc(sizeof(int)), *ptr = null;
-};
-
 int main(){
 
-    teste &t = *new teste();
-    *t.null = 5;
-    //int **prt = (int **) malloc(sizeof(int *));
-    //*ptr = t.ptr;
-    int **ptr = &t.ptr;
-    int a = 3;
-    (*ptr) = &a;
-    **ptr = 82;
-    printf("%d %d %d %d\n", *t.null, *t.ptr, **ptr, a);
+    RedBlackTree<int> &rbt = *new RedBlackTree<int>();
+    int a = 2;
+    for(int i=0; i<16; i++) rbt.add(i, a);
     return 0;
 
 }
